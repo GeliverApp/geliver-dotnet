@@ -1,0 +1,9 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.DS_Store
+.env
+

@@ -3,8 +3,9 @@
 Geliver C# SDK — official .NET client for Geliver Kargo Pazaryeri (Shipping Marketplace) API.
 Türkiye’nin e‑ticaret gönderim altyapısı için kolay kargo entegrasyonu sağlar.
 
-Dokümantasyon (TR): Modeller ve endpoint detayları için https://docs.geliver.com
-Documentation (EN): For detailed models and endpoints, see https://docs.geliver.com
+• Dokümantasyon (TR/EN): https://docs.geliver.io
+
+---
 
 ## İçindekiler
 
@@ -25,8 +26,12 @@ Türkçe (TR)
 - 6) Etiketleri indirin (DownloadLabelForShipmentAsync, DownloadResponsiveLabelForShipmentAsync)
 - 7) İade gönderisi gerekiyorsa Shipments.CreateReturnAsync kullanın
 
+---
+
 ## Kurulum
 - Yerelde derleme: `dotnet build sdks/csharp/src/Geliver.Sdk`
+
+---
 
 ## Hızlı Başlangıç
 ```csharp
@@ -41,6 +46,8 @@ var shipment = await client.Shipments.CreateTestAsync(new {
   length = 10, width = 10, height = 10, distanceUnit = "cm", weight = 1, massUnit = "kg",
 });
 ```
+
+---
 
 ## Türkçe Akış (TR)
 ```csharp
@@ -102,6 +109,8 @@ var final = await client.Shipments.GetAsync(shipment!.Id);
 Console.WriteLine($"Final tracking status: {final!.TrackingStatus?.TrackingStatusCode} {final!.TrackingStatus?.TrackingSubStatusCode}");
 ```
 
+---
+
 ## Alıcıyı ID ile oluşturma (recipientAddressID)
 ```csharp
 // Önce alıcı adresini oluşturun ve ID alın
@@ -121,8 +130,12 @@ var createdDirect = await client.Shipments.CreateAsync(new {
 });
 ```
 
+---
+
 ## Webhooklar
 - `/webhooks/geliver` için bir controller veya minimal API endpoint'i tanımlayın; doğrulama için `Webhooks.Verify(body, headers, enableVerification: false)` kullanabilirsiniz.
+
+---
 
 ## Testler
 - Özel bir `HttpMessageHandler` enjekte ederek test yazabilirsiniz.
@@ -140,6 +153,8 @@ await File.WriteAllBytesAsync("label.pdf", pdf);
 var html = await client.DownloadResponsiveLabelForShipmentAsync(shipment!.Id);
 await File.WriteAllTextAsync("label.html", html);
 ```
+
+---
 
 ## Modeller ve Notlar
  - Shipment, Transaction, TrackingStatus, Address, ParcelTemplate, ProviderAccount, Webhook, Offer, PriceQuote ve daha fazlası.

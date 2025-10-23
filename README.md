@@ -51,14 +51,14 @@ using Geliver.Sdk;
 
 var client = new GeliverClient(token: "YOUR_TOKEN");
 
-// 1) Create sender address
+// 1) Gönderici adresi oluşturun. Her gönderici adresi için tek seferlik kullanılır. Gönderici ID'sini saklayınız.
 var sender = await client.Addresses.CreateSenderAsync(new {
   name = "ACME Inc.", email = "ops@acme.test", phone = "+905051234567",
   address1 = "Street 1", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
   districtName = "Esenyurt", districtID = 107605, zip = "34020",
 });
 
-// 2) Create shipment (Option A: inline recipient address)
+// 2) Alıcı adres bilgileri ile Gönderi oluşturun
 var shipment = await client.Shipments.CreateAsync(new {
   sourceCode = "API",
   senderAddressID = sender!["id"],
@@ -99,7 +99,8 @@ while (true)
   await Task.Delay(1000);
 }
 
-// Test mode only: trigger 5 lightweight GET calls to advance status; in prod use webhooks
+// Sadece TEST için: 5 kez shipment get yaparak gönderi durumu her istekte güncellenir; Prodda webhook veya periyodik tetikleme gerekir.
+
 for (var i = 0; i < 5; i++) { await client.Shipments.GetAsync(shipment!.Id); await Task.Delay(1000); }
 var final = await client.Shipments.GetAsync(shipment!.Id);
 Console.WriteLine($"Final tracking status: {final!.TrackingStatus?.TrackingStatusCode} {final!.TrackingStatus?.TrackingSubStatusCode}");

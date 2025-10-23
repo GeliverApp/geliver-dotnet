@@ -16,24 +16,16 @@ Türkiye’nin e‑ticaret gönderim altyapısı için kolay kargo entegrasyonu 
 - Testler
 - Modeller ve Notlar
 
-Türkçe (TR)
-- 0) Geliver Kargo API tokenı alın (https://app.geliver.io/apitokens adresinden)
-- 1) Gönderici adresi oluşturun (Addresses.CreateSenderAsync)
-- 2) Gönderiyi alıcıyı ID ile ya da adres nesnesi ile vererek oluşturun (Shipments.CreateAsync)
-- 3) Teklifleri bekleyip kabul edin (Transactions.AcceptOfferAsync)
-- 4) Barkod, takip numarası, etiket URL’leri Transaction içindeki Shipment’ten okunur
-- 5) Test gönderilerinde her GET isteği kargo durumunu bir adım ilerletir; prod'da webhook kurun
-- 6) Etiketleri indirin (DownloadLabelForShipmentAsync, DownloadResponsiveLabelForShipmentAsync)
-- 7) İade gönderisi gerekiyorsa Shipments.CreateReturnAsync kullanın
-
 ---
 
 ## Kurulum
+
 - Yerelde derleme: `dotnet build sdks/csharp/src/Geliver.Sdk`
 
 ---
 
 ## Hızlı Başlangıç
+
 ```csharp
 using Geliver.Sdk;
 
@@ -49,7 +41,17 @@ var shipment = await client.Shipments.CreateTestAsync(new {
 
 ---
 
-## Türkçe Akış (TR)
+## Akış (TR)
+
+1. Geliver Kargo API tokenı alın (https://app.geliver.io/apitokens adresinden)
+2. Gönderici adresi oluşturun (Addresses.CreateSenderAsync)
+3. Gönderiyi alıcıyı ID ile ya da adres nesnesi ile vererek oluşturun (Shipments.CreateAsync)
+4. Teklifleri bekleyip kabul edin (Transactions.AcceptOfferAsync)
+5. Barkod, takip numarası, etiket URL’leri Transaction içindeki Shipment’ten okunur
+6. Test gönderilerinde her GET isteği kargo durumunu bir adım ilerletir; prod'da webhook kurun
+7. Etiketleri indirin (DownloadLabelForShipmentAsync, DownloadResponsiveLabelForShipmentAsync)
+8. İade gönderisi gerekiyorsa Shipments.CreateReturnAsync kullanın
+
 ```csharp
 using Geliver.Sdk;
 
@@ -112,6 +114,7 @@ Console.WriteLine($"Final tracking status: {final!.TrackingStatus?.TrackingStatu
 ---
 
 ## Alıcıyı ID ile oluşturma (recipientAddressID)
+
 ```csharp
 // Önce alıcı adresini oluşturun ve ID alın
 var recipient = await client.Addresses.CreateRecipientAsync(new {
@@ -133,15 +136,18 @@ var createdDirect = await client.Shipments.CreateAsync(new {
 ---
 
 ## Webhooklar
+
 - `/webhooks/geliver` için bir controller veya minimal API endpoint'i tanımlayın; doğrulama için `Webhooks.Verify(body, headers, enableVerification: false)` kullanabilirsiniz.
 
 ---
 
 ## Testler
+
 - Özel bir `HttpMessageHandler` enjekte ederek test yazabilirsiniz.
 - Üretilmiş model sınıfları `Geliver.Sdk.Models` altında bulunur (OpenAPI’den otomatik).
 
 Manuel takip kontrolü (isteğe bağlı)
+
 ```csharp
 var latest = await client.Shipments.GetAsync(created!.Id);
 var ts = latest is not null ? (latest as Dictionary<string, object>) : null; // or create a typed wrapper
@@ -157,19 +163,22 @@ await File.WriteAllTextAsync("label.html", html);
 ---
 
 ## Modeller ve Notlar
- - Shipment, Transaction, TrackingStatus, Address, ParcelTemplate, ProviderAccount, Webhook, Offer, PriceQuote ve daha fazlası.
- - Tam liste: `Geliver.Sdk.Models`.
+
+- Shipment, Transaction, TrackingStatus, Address, ParcelTemplate, ProviderAccount, Webhook, Offer, PriceQuote ve daha fazlası.
+- Tam liste: `Geliver.Sdk.Models`.
 
 English (EN) Quick Guide
-- 1) Create sender address (Addresses.CreateSenderAsync)
-- 2) Create shipment via inline recipient or recipientAddressID
-- 3) Wait for offers and accept with Transactions.AcceptOfferAsync
-- 4) Read barcode/tracking/labels from Transaction.Shipment
-- 5) Use WaitForTrackingNumberAsync or webhooks
-- 6) Download labels (PDF/HTML)
-- 7) Create return shipment with Shipments.CreateReturnAsync
+
+- 1. Create sender address (Addresses.CreateSenderAsync)
+- 2. Create shipment via inline recipient or recipientAddressID
+- 3. Wait for offers and accept with Transactions.AcceptOfferAsync
+- 4. Read barcode/tracking/labels from Transaction.Shipment
+- 5. Use WaitForTrackingNumberAsync or webhooks
+- 6. Download labels (PDF/HTML)
+- 7. Create return shipment with Shipments.CreateReturnAsync
 
 Enum Kullanımı (TR)
+
 ```csharp
 using Geliver.Sdk.Models;
 
@@ -183,15 +192,15 @@ if (s!.LabelFileType == ShipmentLabelFileType.PDF) {
 Geliver Kargo Pazaryeri: https://geliver.io/
 
 Etiketler (Tags): csharp, dotnet, sdk, api-client, geliver, kargo, kargo-pazaryeri, shipping, e-commerce, turkey
-[![Geliver Kargo Pazaryeri](https://geliver.io/geliverlogo.png)](https://geliver.io/)
-Geliver Kargo Pazaryeri: https://geliver.io/
 
 Notlar ve İpuçları (TR)
+
 - Sayısal alanlar `decimal` olarak işlenir ve JSON string sayılar desteklenir.
 - Teklif beklerken 1 sn aralıkla tekrar sorgulayın.
 - Test gönderisi için `new { ..., test = true }` veya `CreateTestAsync(...)` kullanın.
 - İlçe seçimi: districtID (number) kullanınız. districtName her zaman doğru eşleşmeyebilir.
 - Şehir/İlçe seçimi: cityCode ve cityName birlikte/ayrı gönderilebilir; cityCode daha güvenlidir. Şehir/ilçe listeleri için API:
+
 ```csharp
 var cities = await client.Geo.ListCitiesAsync("TR");
 var districts = await client.Geo.ListDistrictsAsync("TR", "34");

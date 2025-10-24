@@ -151,6 +151,22 @@ var html = await client.DownloadResponsiveLabelForShipmentAsync(shipment!.Id);
 await File.WriteAllTextAsync("label.html", html);
 ```
 
+---
+
+## İade Gönderisi Oluşturun
+
+```csharp
+var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new {
+  willAccept = true,
+  providerServiceCode = "SURAT_STANDART",
+  count = 1,
+});
+```
+
+Not:
+- `providerServiceCode` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin sağlayıcısı kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
+- `senderAddress` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin alıcı adresi kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
+
 ## Modeller
 
 - Shipment, Transaction, TrackingStatus, Address, ParcelTemplate, ProviderAccount, Webhook, Offer, PriceQuote ve daha fazlası.

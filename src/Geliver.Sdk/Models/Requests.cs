@@ -21,11 +21,11 @@ public class CreateShipmentRequestBase
 {
     public required string SourceCode { get; set; }
     public required string SenderAddressID { get; set; }
-    public double? Length { get; set; }
-    public double? Width { get; set; }
-    public double? Height { get; set; }
+    public string? Length { get; set; }
+    public string? Width { get; set; }
+    public string? Height { get; set; }
     public string? DistanceUnit { get; set; }
-    public double? Weight { get; set; }
+    public string? Weight { get; set; }
     public string? MassUnit { get; set; }
     public string? ProviderServiceCode { get; set; }
 }
@@ -42,11 +42,10 @@ public class CreateShipmentWithRecipientAddress : CreateShipmentRequestBase
 
 public class UpdatePackageRequest
 {
-    public double? Height { get; set; }
-    public double? Width { get; set; }
-    public double? Length { get; set; }
+    public string? Height { get; set; }
+    public string? Width { get; set; }
+    public string? Length { get; set; }
     public string? DistanceUnit { get; set; }
-    public double? Weight { get; set; }
+    public string? Weight { get; set; }
     public string? MassUnit { get; set; }
 }
-

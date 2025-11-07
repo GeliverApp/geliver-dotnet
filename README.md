@@ -35,6 +35,8 @@ var shipment = await client.Shipments.CreateTestAsync(new {
 });
 ```
 
+Canlı ortamda `CreateTestAsync(...)` yerine `Shipments.CreateAsync(...)` çağırın.
+
 ## Akış (TR)
 
 1. Geliver Kargo API tokenı alın (https://app.geliver.io/apitokens adresinden)
@@ -43,7 +45,7 @@ var shipment = await client.Shipments.CreateTestAsync(new {
 4. Teklifleri bekleyip kabul edin (Transactions.AcceptOfferAsync)
 5. Barkod, takip numarası, etiket URL’leri Transaction içindeki Shipment’ten okunur
 6. Test gönderilerinde her GET isteği kargo durumunu bir adım ilerletir; prod'da webhook kurun
-7. Etiketleri indirin (DownloadLabelForShipmentAsync, DownloadResponsiveLabelForShipmentAsync)
+7. Etiketleri indirin (Transaction/Shipment içindeki URL'den indirin)
 8. İade gönderisi gerekiyorsa Shipments.CreateReturnAsync kullanın
 
 ```csharp
@@ -72,11 +74,12 @@ var shipment = await client.Shipments.CreateAsync(new {
 
 // Etiketler bazı akışlarda create sonrasında hazır olabilir; varsa hemen indirin
 if (!string.IsNullOrEmpty(shipment!.LabelURL)) {
-  var prePdf = await client.DownloadLabelForShipmentAsync(shipment!.Id);
+  // Ek GET yapmadan doğrudan URL'den indirin
+  var prePdf = await client.DownloadLabelAsync(shipment!.LabelURL);
   await File.WriteAllBytesAsync("label_pre.pdf", prePdf);
 }
 if (!string.IsNullOrEmpty(shipment!.ResponsiveLabelURL)) {
-  var preHtml = await client.DownloadResponsiveLabelForShipmentAsync(shipment!.Id);
+  var preHtml = await client.DownloadResponsiveLabelAsync(shipment!.ResponsiveLabelURL);
   await File.WriteAllTextAsync("label_pre.html", preHtml);
 }
 
@@ -85,7 +88,7 @@ while (true)
 {
   s = await client.RequestAsync<Dictionary<string, object>>(HttpMethod.Get, $"/shipments/{shipment!.Id}");
   var offers = s!["offers"] as Dictionary<string, object>;
-  if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) >= 99 || offers.ContainsKey("cheapest"))) {
+  if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) == 100 || offers.ContainsKey("cheapest"))) {
     var cheapest = offers["cheapest"] as Dictionary<string, object>;
     var tx = await client.Transactions.AcceptOfferAsync(cheapest!["id"].ToString()!);
     if (tx.Shipment is not null) {
@@ -145,9 +148,10 @@ var ts = latest is not null ? (latest as Dictionary<string, object>) : null; // 
 // If you prefer dynamic, adjust your deserialization to a DTO with TrackingStatus
 
 // Download labels
-var pdf = await client.DownloadLabelForShipmentAsync(shipment!.Id);
+// Teklif kabulünden sonra Transaction.Shipment içindeki URL'leri kullanın (ek GET yok)
+var pdf = await client.DownloadLabelAsync(tx!.Shipment!.LabelURL!);
 await File.WriteAllBytesAsync("label.pdf", pdf);
-var html = await client.DownloadResponsiveLabelForShipmentAsync(shipment!.Id);
+var html = await client.DownloadResponsiveLabelAsync(tx!.Shipment!.ResponsiveLabelURL!);
 await File.WriteAllTextAsync("label.html", html);
 ```
 
@@ -164,6 +168,7 @@ var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new {
 ```
 
 Not:
+
 - `providerServiceCode` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin sağlayıcısı kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
 - `senderAddress` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin alıcı adresi kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
 
@@ -187,8 +192,9 @@ if (s!.LabelFileType == ShipmentLabelFileType.PDF) {
 
 - Sayısal alanlar `decimal` olarak işlenir ve JSON string sayılar desteklenir.
 - Teklif beklerken 1 sn aralıkla tekrar sorgulayın.
-- Test gönderisi için `new { ..., test = true }` veya `CreateTestAsync(...)` kullanın.
+- Test gönderisi için `new { ..., test = true }` veya `CreateTestAsync(...)` kullanın; canlı ortamda `Shipments.CreateAsync(...)` tercih edin.
 - İlçe seçimi: districtID (number) kullanınız. districtName her zaman doğru eşleşmeyebilir.
+- Takip numarası ile takip URL'si bazı kargo firmalarında teklif kabulünün hemen ardından oluşmayabilir. Paketi kargo şubesine teslim ettiğinizde veya kargo sizden teslim aldığında bu alanlar tamamlanır. Webhooklar ile değerleri otomatik çekebilir ya da teslimden sonra `shipment` GET isteği yaparak güncel bilgileri alabilirsiniz.
 - Şehir/İlçe seçimi: cityCode ve cityName birlikte/ayrı gönderilebilir; cityCode daha güvenlidir. Şehir/ilçe listeleri için API:
 
 ```csharp

@@ -17,25 +17,16 @@ var shipment = await client.Shipments.CreateTestAsync(new {
     name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
     districtName = "Kadikoy", districtID = 100000, zip = "34000",
   },
-  length = 10, width = 10, height = 10, distanceUnit = "cm",
-  weight = 1, massUnit = "kg",
+  // Request dimensions/weight must be strings
+  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm",
+  weight = "1.0", massUnit = "kg",
 });
 
-// Etiketler bazı akışlarda create sonrasında hazır olabilir; varsa hemen indirin
-if (!string.IsNullOrEmpty(shipment!.LabelURL))
-{
-  var prePdf = await client.DownloadLabelForShipmentAsync(shipment!.Id);
-  await File.WriteAllBytesAsync("label_pre.pdf", prePdf);
-}
-if (!string.IsNullOrEmpty(shipment!.ResponsiveLabelURL))
-{
-  var preHtml = await client.DownloadResponsiveLabelForShipmentAsync(shipment!.Id);
-  await File.WriteAllTextAsync("label_pre.html", preHtml);
-}
+// Etiket indirme: Teklif kabulünden sonra (Transaction) gelen URL'leri kullanabilirsiniz de; URL'lere her shipment nesnesinin içinden ulaşılır.
 
 // Teklifler create yanıtında hazır olabilir; önce shipment.Offers'i kontrol edin
 var offersObj = shipment!.Offers;
-if (!(offersObj != null && (offersObj.PercentageCompleted >= 99 || offersObj.Cheapest != null)))
+if (!(offersObj != null && (offersObj.PercentageCompleted == 100 || offersObj.Cheapest != null)))
 {
   while (true)
   {
@@ -43,7 +34,7 @@ if (!(offersObj != null && (offersObj.PercentageCompleted >= 99 || offersObj.Che
     if (sDict!.TryGetValue("offers", out var offersRaw))
     {
       var offers = offersRaw as Dictionary<string, object>;
-      if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) >= 99 || offers.ContainsKey("cheapest")))
+      if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) == 100 || offers.ContainsKey("cheapest")))
       {
         var cheapest = offers["cheapest"] as Dictionary<string, object>;
         var tx = await client.Transactions.AcceptOfferAsync(cheapest!["id"].ToString()!);
@@ -53,6 +44,17 @@ if (!(offersObj != null && (offersObj.PercentageCompleted >= 99 || offersObj.Che
           Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
           Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
           Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
+          // Download using URLs from transaction (no extra GET)
+          if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
+          {
+            var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
+            await File.WriteAllBytesAsync("label.pdf", pdf2);
+          }
+          if (!string.IsNullOrEmpty(tx.Shipment.ResponsiveLabelURL))
+          {
+            var html2 = await client.DownloadResponsiveLabelAsync(tx.Shipment.ResponsiveLabelURL);
+            await File.WriteAllTextAsync("label.html", html2);
+          }
         }
         goto OffersAccepted;
       }
@@ -72,6 +74,17 @@ else
       Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
       Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
       Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
+      // Download using URLs from transaction (no extra GET)
+      if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
+      {
+        var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
+        await File.WriteAllBytesAsync("label.pdf", pdf2);
+      }
+      if (!string.IsNullOrEmpty(tx.Shipment.ResponsiveLabelURL))
+      {
+        var html2 = await client.DownloadResponsiveLabelAsync(tx.Shipment.ResponsiveLabelURL);
+        await File.WriteAllTextAsync("label.html", html2);
+      }
     }
   }
 }

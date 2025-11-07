@@ -117,6 +117,14 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CreateAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (dict.TryGetValue("order", out var orderObj) && orderObj is Dictionary<string, object> orderDict)
+        {
+            if (!orderDict.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict["sourceCode"])))
+            {
+                orderDict["sourceCode"] = "API";
+            }
+            dict["order"] = orderDict;
+        }
         foreach (var k in new[] { "length", "width", "height", "weight" })
         {
             if (dict.TryGetValue(k, out var v) && v is not null) dict[k] = Convert.ToString(v)!;
@@ -152,6 +160,14 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CreateTestAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (dict.TryGetValue("order", out var orderObj2) && orderObj2 is Dictionary<string, object> orderDict2)
+        {
+            if (!orderDict2.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict2["sourceCode"])))
+            {
+                orderDict2["sourceCode"] = "API";
+            }
+            dict["order"] = orderDict2;
+        }
         foreach (var k in new[] { "length", "width", "height", "weight" })
         {
             if (dict.TryGetValue(k, out var v) && v is not null) dict[k] = Convert.ToString(v)!;

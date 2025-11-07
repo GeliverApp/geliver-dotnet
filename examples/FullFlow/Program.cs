@@ -11,12 +11,12 @@ var sender = await client.Addresses.CreateAsync(new {
 });
 
 var shipment = await client.Shipments.CreateTestAsync(new {
-  sourceCode = "API",
   senderAddressID = sender!["id"],
   recipientAddress = new {
     name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
     districtName = "Kadikoy", districtID = 100000, zip = "34000",
   },
+  order = new { orderNumber = "ABC12333322", sourceIdentifier = "https://magazaadresiniz.com", totalAmount = "150", totalAmountCurrency = "TL" },
   // Request dimensions/weight must be strings
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm",
   weight = "1.0", massUnit = "kg",

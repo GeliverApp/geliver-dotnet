@@ -102,7 +102,7 @@ while (true)
   await Task.Delay(1000);
 }
 
-// Sadece TEST için: 5 kez shipment get yaparak gönderi durumu her istekte güncellenir; Prodda webhook veya periyodik tetikleme gerekir.
+// Sadece TEST için: get yaparak gönderi durumu her istekte güncellenir; Prodda webhook veya periyodik tetikleme gerekir.
 
 for (var i = 0; i < 5; i++) { await client.Shipments.GetAsync(shipment!.Id); await Task.Delay(1000); }
 var final = await client.Shipments.GetAsync(shipment!.Id);
@@ -119,7 +119,8 @@ var recipient = await client.Addresses.CreateRecipientAsync(new {
 });
 
 // Ardından recipientAddressID ile gönderi oluşturun
-var createdDirect = await client.Shipments.CreateAsync(new {
+// Canlı ortamda CreateTestAsync yerine CreateAsync kullanın.
+var createdDirect = await client.Shipments.CreateTestAsync(new {
   sourceCode = "API",
   senderAddressID = sender!["id"],
   recipientAddressID = recipient!["id"],

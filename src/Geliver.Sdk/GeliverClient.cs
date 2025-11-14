@@ -127,6 +127,13 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CreateAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (dict.TryGetValue("recipientAddress", out var ra) && ra is Dictionary<string, object> rad)
+        {
+            if (!rad.TryGetValue("phone", out var ph) || string.IsNullOrWhiteSpace(Convert.ToString(ph)))
+            {
+                throw new ArgumentException("recipientAddress.phone is required");
+            }
+        }
         if (dict.TryGetValue("order", out var orderObj) && orderObj is Dictionary<string, object> orderDict)
         {
             if (!orderDict.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict["sourceCode"])))
@@ -170,6 +177,13 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CreateTestAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (dict.TryGetValue("recipientAddress", out var ra2) && ra2 is Dictionary<string, object> rad2)
+        {
+            if (!rad2.TryGetValue("phone", out var ph2) || string.IsNullOrWhiteSpace(Convert.ToString(ph2)))
+            {
+                throw new ArgumentException("recipientAddress.phone is required");
+            }
+        }
         if (dict.TryGetValue("order", out var orderObj2) && orderObj2 is Dictionary<string, object> orderDict2)
         {
             if (!orderDict2.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict2["sourceCode"])))
@@ -236,6 +250,9 @@ public class TransactionsResource
     private readonly GeliverClient _c;
     internal TransactionsResource(GeliverClient c) { _c = c; }
     public Task<Models.Transaction?> AcceptOfferAsync(string offerId, CancellationToken ct = default) => _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, new { offerID = offerId }, ct);
+
+    /// <summary>One-step label purchase: post shipment details directly to /transactions.</summary>
+    public Task<Models.Transaction?> CreateAsync(object body, CancellationToken ct = default) => _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, body, ct);
 }
 
 public class AddressesResource
@@ -246,12 +263,28 @@ public class AddressesResource
     public Task<Dictionary<string, object>?> CreateSenderAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (!dict.TryGetValue("zip", out var zip) && !dict.TryGetValue("Zip", out zip))
+        {
+            throw new ArgumentException("zip is required for sender addresses");
+        }
+        if (zip is null || string.IsNullOrWhiteSpace(Convert.ToString(zip)))
+        {
+            throw new ArgumentException("zip is required for sender addresses");
+        }
         dict["isRecipientAddress"] = false;
         return _c.RequestAsync<Dictionary<string, object>>(HttpMethod.Post, "/addresses", null, dict, ct);
     }
     public Task<Dictionary<string, object>?> CreateRecipientAsync(object body, CancellationToken ct = default)
     {
         var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        if (!dict.TryGetValue("phone", out var phone) && !dict.TryGetValue("Phone", out phone))
+        {
+            throw new ArgumentException("phone is required for recipient addresses");
+        }
+        if (phone is null || string.IsNullOrWhiteSpace(Convert.ToString(phone)))
+        {
+            throw new ArgumentException("phone is required for recipient addresses");
+        }
         dict["isRecipientAddress"] = true;
         return _c.RequestAsync<Dictionary<string, object>>(HttpMethod.Post, "/addresses", null, dict, ct);
     }

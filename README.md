@@ -204,6 +204,46 @@ var cities = await client.Geo.ListCitiesAsync("TR");
 var districts = await client.Geo.ListDistrictsAsync("TR", "34");
 ```
 
+- Adres kuralları: phone alanı hem gönderici hem alıcı adresleri için zorunludur. Zip alanı gönderici adresi için zorunludur; alıcı adresi için opsiyoneldir. `Addresses.CreateSenderAsync(...)` phone/zip eksikse, `Addresses.CreateRecipientAsync(...)` phone eksikse hata verir.
+
+## Örnekler
+
+- Tam akış: `sdks/csharp/examples/FullFlow/Program.cs`
+- Tek aşamada gönderi (Create Transaction): örnek kod
+
+```csharp
+var tx = await client.Transactions.CreateAsync(new {
+  senderAddressID = sender!["id"],
+  recipientAddress = new { name = "OneStep Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
+});
+```
+
+- Kapıda ödeme: örnek kod
+
+```csharp
+var txPod = await client.Transactions.CreateAsync(new {
+  senderAddressID = sender!["id"],
+  recipientAddress = new { name = "POD Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
+  providerServiceCode = "PTT_KAPIDA_ODEME",
+  productPaymentOnDelivery = true,
+  order = new { orderNumber = "POD-12345", totalAmount = "150", totalAmountCurrency = "TL" },
+});
+```
+
+- Kendi anlaşmanızla etiket satın alma: örnek kod
+
+```csharp
+var txOwn = await client.Transactions.CreateAsync(new {
+  senderAddressID = sender!["id"],
+  recipientAddress = new { name = "OwnAg Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
+  providerServiceCode = "SURAT_STANDART",
+  providerAccountID = "c0dfdb42-012d-438c-9d49-98d13b4d4a2b",
+});
+```
+
 ---
 
 [![Geliver Kargo Pazaryeri](https://geliver.io/geliverlogo.png)](https://geliver.io/)

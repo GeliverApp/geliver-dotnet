@@ -11,7 +11,7 @@ public class CreateAddressRequest
     public required string CityName { get; set; }
     public required string CityCode { get; set; }
     public required string DistrictName { get; set; }
-    public required int DistrictID { get; set; }
+    public int? DistrictID { get; set; }
     public required string Zip { get; set; }
     public string? ShortName { get; set; }
     public bool? IsRecipientAddress { get; set; }

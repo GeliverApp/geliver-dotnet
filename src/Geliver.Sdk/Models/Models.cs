@@ -60,9 +60,7 @@ public class District {
   public string? RegionCode { get; set; }
 }
 
-/// <summary>Duration model</summary>
-public class Duration {
-}
+// Duration model removed; API returns integer timestamp for duration fields.
 
 /// <summary>Item model</summary>
 public class Item {
@@ -102,7 +100,7 @@ public class Offer {
   public string? AmountOld { get; set; }
   public string? AmountTax { get; set; }
   public string? AmountVat { get; set; }
-  public Duration? AverageEstimatedTime { get; set; }
+  public long? AverageEstimatedTime { get; set; }
   public string? AverageEstimatedTimeHumanReadible { get; set; }
   public string? BonusBalance { get; set; }
   public string? CreatedAt { get; set; }
@@ -118,8 +116,8 @@ public class Offer {
   public bool? IsGlobal { get; set; }
   public bool? IsMainOffer { get; set; }
   public bool? IsProviderAccountOffer { get; set; }
-  public Duration? MaxEstimatedTime { get; set; }
-  public Duration? MinEstimatedTime { get; set; }
+  public long? MaxEstimatedTime { get; set; }
+  public long? MinEstimatedTime { get; set; }
   public string? Owner { get; set; }
   public decimal? PredictedDeliveryTime { get; set; }
   public string? ProviderAccountID { get; set; }

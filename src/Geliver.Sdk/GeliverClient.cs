@@ -62,6 +62,7 @@ public class GeliverClient
         {
             var res = await _http.SendAsync(req, ct);
             var text = await res.Content.ReadAsStringAsync(ct);
+            using var doc = JsonDocument.Parse(string.IsNullOrEmpty(text) ? "{}" : text);
             if (!res.IsSuccessStatusCode)
             {
                 if (ShouldRetry((int)res.StatusCode) && attempt < _maxRetries)
@@ -70,11 +71,20 @@ public class GeliverClient
                     await Task.Delay(BackoffDelay(attempt), ct);
                     continue;
                 }
-                throw new HttpRequestException($"HTTP {(int)res.StatusCode}");
+                var code = doc.RootElement.TryGetProperty("code", out var codeEl) ? codeEl.GetString() : null;
+                var msg = doc.RootElement.TryGetProperty("message", out var msgEl) ? (msgEl.GetString() ?? $"HTTP {(int)res.StatusCode}") : $"HTTP {(int)res.StatusCode}";
+                var addl = doc.RootElement.TryGetProperty("additionalMessage", out var addlEl) ? addlEl.GetString() : null;
+                throw new GeliverApiException(msg, (int)res.StatusCode, code, addl, text);
             }
-            using var doc = JsonDocument.Parse(string.IsNullOrEmpty(text) ? "{}" : text);
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString };
             options.Converters.Add(new JsonStringEnumConverter());
+            if (doc.RootElement.TryGetProperty("result", out var r) && r.ValueKind == JsonValueKind.False)
+            {
+                var code = doc.RootElement.TryGetProperty("code", out var codeEl) ? codeEl.GetString() : null;
+                var msg = doc.RootElement.TryGetProperty("message", out var msgEl) ? (msgEl.GetString() ?? "API error") : "API error";
+                var addl = doc.RootElement.TryGetProperty("additionalMessage", out var addlEl) ? addlEl.GetString() : null;
+                throw new GeliverApiException(msg, (int)res.StatusCode, code, addl, text);
+            }
             if (doc.RootElement.TryGetProperty("data", out var data))
             {
                 return data.Deserialize<T>(options);
@@ -196,12 +206,29 @@ public class ShipmentsResource
 public class ListEnvelope<T>
 {
     public bool? Result { get; set; }
+    public string? Code { get; set; }
+    public string? Message { get; set; }
     public string? AdditionalMessage { get; set; }
     public int? Limit { get; set; }
     public int? Page { get; set; }
     public int? TotalRows { get; set; }
     public int? TotalPages { get; set; }
     public T? Data { get; set; }
+}
+
+public class GeliverApiException : HttpRequestException
+{
+    public string? Code { get; }
+    public string? AdditionalMessage { get; }
+    public int Status { get; }
+    public string? Body { get; }
+    public GeliverApiException(string message, int status, string? code, string? additionalMessage, string? body) : base(message)
+    {
+        Status = status;
+        Code = code;
+        AdditionalMessage = additionalMessage;
+        Body = body;
+    }
 }
 
 public class TransactionsResource

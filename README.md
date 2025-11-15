@@ -206,6 +206,25 @@ var districts = await client.Geo.ListDistrictsAsync("TR", "34");
 
 - Adres kuralları: phone alanı hem gönderici hem alıcı adresleri için zorunludur. Zip alanı gönderici adresi için zorunludur; alıcı adresi için opsiyoneldir. `Addresses.CreateSenderAsync(...)` phone/zip eksikse, `Addresses.CreateRecipientAsync(...)` phone eksikse hata verir.
 
+## Hatalar ve İstisnalar
+
+- İstemci şu durumlarda `GeliverApiException` fırlatır: (1) HTTP 4xx/5xx; (2) JSON envelope `result == false`.
+- Hata alanları: `Code`, `AdditionalMessage`, `Status`, `Body`, `Message`.
+
+```csharp
+try
+{
+    await client.Shipments.CreateAsync(new { /* ... */ });
+}
+catch (GeliverApiException ex)
+{
+    Console.WriteLine($"code: {ex.Code}");
+    Console.WriteLine($"message: {ex.Message}");
+    Console.WriteLine($"additional: {ex.AdditionalMessage}");
+    Console.WriteLine($"status: {ex.Status}");
+}
+```
+
 ## Örnekler
 
 - Tam akış: `sdks/csharp/examples/FullFlow/Program.cs`

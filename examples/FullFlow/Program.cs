@@ -24,142 +24,83 @@ var shipment = await client.Shipments.CreateTestAsync(new {
 
 // Etiket indirme: Teklif kabulünden sonra (Transaction) gelen URL'leri kullanabilirsiniz de; URL'lere her shipment nesnesinin içinden ulaşılır.
 
-// Teklifler create yanıtında hazır olabilir; önce shipment.Offers'i kontrol edin
-var offersObj = shipment!.Offers;
-if (!(offersObj != null && (offersObj.PercentageCompleted == 100 || offersObj.Cheapest != null)))
+// Teklifler create yanıtında hazır olabilir; yoksa tek GET ile güncel shipment alın
+var typedOffers = shipment!.Offers ?? (await client.Shipments.GetAsync(shipment!.Id))?.Offers;
+Dictionary<string, object>? offersDict = null;
+if (typedOffers?.Cheapest is null)
 {
-  while (true)
+  var sDict = await client.RequestAsync<Dictionary<string, object>>(HttpMethod.Get, $"/shipments/{shipment!.Id}");
+  if (sDict != null && sDict.TryGetValue("offers", out var offersRaw))
   {
-    var sDict = await client.RequestAsync<Dictionary<string, object>>(HttpMethod.Get, $"/shipments/{shipment!.Id}");
-    if (sDict!.TryGetValue("offers", out var offersRaw))
-    {
-      var offers = offersRaw as Dictionary<string, object>;
-      if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) == 100 || offers.ContainsKey("cheapest")))
-      {
-        var cheapest = offers["cheapest"] as Dictionary<string, object>;
-        if (cheapest == null)
-        {
-          Console.WriteLine("Error: No cheapest offer available");
-          return;
-        }
-
-        Transaction? tx;
-        try
-        {
-          tx = await client.Transactions.AcceptOfferAsync(cheapest["id"].ToString()!);
-        }
-        catch (Exception ex)
-        {
-          Console.WriteLine($"Accept offer error: {ex.Message}");
-          if (ex is HttpRequestException httpEx && httpEx.Data.Contains("ResponseBody"))
-          {
-            Console.WriteLine($"API Error: {httpEx.Data["ResponseBody"]}");
-          }
-          return;
-        }
-        Console.WriteLine($"Transaction {tx!.Id}");
-        if (tx.Shipment is not null) {
-          Console.WriteLine($"Barcode: {tx.Shipment.Barcode}");
-          Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
-          Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
-          Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
-
-          // Etiket indirme: LabelFileType kontrolü
-          // Eğer LabelFileType "PROVIDER_PDF" ise, LabelURL'den indirilen PDF etiket kullanılmalıdır.
-          // Eğer LabelFileType "PDF" ise, responsiveLabelURL (HTML) dosyası kullanılabilir.
-          if (tx.Shipment.LabelFileType == "PROVIDER_PDF")
-          {
-            // PROVIDER_PDF: Sadece PDF etiket kullanılmalı
-            if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
-            {
-              var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
-              await File.WriteAllBytesAsync("label.pdf", pdf2);
-              Console.WriteLine("PDF etiket indirildi (PROVIDER_PDF)");
-            }
-          }
-          else if (tx.Shipment.LabelFileType == "PDF")
-          {
-            // PDF: ResponsiveLabel (HTML) kullanılabilir
-            if (!string.IsNullOrEmpty(tx.Shipment.ResponsiveLabelURL))
-            {
-              var html2 = await client.DownloadResponsiveLabelAsync(tx.Shipment.ResponsiveLabelURL);
-              await File.WriteAllTextAsync("label.html", html2);
-              Console.WriteLine("HTML etiket indirildi (PDF)");
-            }
-            // İsteğe bağlı olarak PDF de indirilebilir
-            if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
-            {
-              var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
-              await File.WriteAllBytesAsync("label.pdf", pdf2);
-            }
-          }
-        }
-        goto OffersAccepted;
-      }
-    }
-    await Task.Delay(1000);
-  }
-}
-else
-{
-  // create yanıtında hazırsa doğrudan kabul et (cheapest varsa)
-  if (offersObj!.Cheapest != null)
-  {
-    Transaction? tx;
-    try
-    {
-      tx = await client.Transactions.AcceptOfferAsync(offersObj.Cheapest.Id!);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"Accept offer error: {ex.Message}");
-      if (ex is HttpRequestException httpEx && httpEx.Data.Contains("ResponseBody"))
-      {
-        Console.WriteLine($"API Error: {httpEx.Data["ResponseBody"]}");
-      }
-      return;
-    }
-    Console.WriteLine($"Transaction {tx!.Id}");
-    if (tx.Shipment is not null) {
-      Console.WriteLine($"Barcode: {tx.Shipment.Barcode}");
-      Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
-      Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
-      Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
-
-      // Etiket indirme: LabelFileType kontrolü
-      // Eğer LabelFileType "PROVIDER_PDF" ise, LabelURL'den indirilen PDF etiket kullanılmalıdır.
-      // Eğer LabelFileType "PDF" ise, responsiveLabelURL (HTML) dosyası kullanılabilir.
-      if (tx.Shipment.LabelFileType == "PROVIDER_PDF")
-      {
-        // PROVIDER_PDF: Sadece PDF etiket kullanılmalı
-        if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
-        {
-          var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
-          await File.WriteAllBytesAsync("label.pdf", pdf2);
-          Console.WriteLine("PDF etiket indirildi (PROVIDER_PDF)");
-        }
-      }
-      else if (tx.Shipment.LabelFileType == "PDF")
-      {
-        // PDF: ResponsiveLabel (HTML) kullanılabilir
-        if (!string.IsNullOrEmpty(tx.Shipment.ResponsiveLabelURL))
-        {
-          var html2 = await client.DownloadResponsiveLabelAsync(tx.Shipment.ResponsiveLabelURL);
-          await File.WriteAllTextAsync("label.html", html2);
-          Console.WriteLine("HTML etiket indirildi (PDF)");
-        }
-        // İsteğe bağlı olarak PDF de indirilebilir
-        if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
-        {
-          var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
-          await File.WriteAllBytesAsync("label.pdf", pdf2);
-        }
-      }
-    }
+    offersDict = offersRaw as Dictionary<string, object>;
   }
 }
 
-OffersAccepted:
+string? cheapestOfferId = typedOffers?.Cheapest?.Id;
+Dictionary<string, object>? cheapestMap = null;
+if (cheapestOfferId is null && offersDict != null && offersDict.TryGetValue("cheapest", out var cheapestRaw))
+{
+  cheapestMap = cheapestRaw as Dictionary<string, object>;
+  cheapestOfferId = cheapestMap?["id"]?.ToString();
+}
+
+if (cheapestOfferId is null)
+{
+  Console.WriteLine("Error: No cheapest offer available (henüz hazır değil)");
+  return;
+}
+
+Transaction? tx;
+try
+{
+  tx = await client.Transactions.AcceptOfferAsync(cheapestOfferId);
+}
+catch (Exception ex)
+{
+  Console.WriteLine($"Accept offer error: {ex.Message}");
+  if (ex is HttpRequestException httpEx && httpEx.Data.Contains("ResponseBody"))
+  {
+    Console.WriteLine($"API Error: {httpEx.Data["ResponseBody"]}");
+  }
+  return;
+}
+Console.WriteLine($"Transaction {tx!.Id}");
+if (tx.Shipment is not null) {
+  Console.WriteLine($"Barcode: {tx.Shipment.Barcode}");
+  Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
+  Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
+  Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
+
+  // Etiket indirme: LabelFileType kontrolü
+  // Eğer LabelFileType "PROVIDER_PDF" ise, LabelURL'den indirilen PDF etiket kullanılmalıdır.
+  // Eğer LabelFileType "PDF" ise, responsiveLabelURL (HTML) dosyası kullanılabilir.
+  if (tx.Shipment.LabelFileType == "PROVIDER_PDF")
+  {
+    // PROVIDER_PDF: Sadece PDF etiket kullanılmalı
+    if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
+    {
+      var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
+      await File.WriteAllBytesAsync("label.pdf", pdf2);
+      Console.WriteLine("PDF etiket indirildi (PROVIDER_PDF)");
+    }
+  }
+  else if (tx.Shipment.LabelFileType == "PDF")
+  {
+    // PDF: ResponsiveLabel (HTML) kullanılabilir
+    if (!string.IsNullOrEmpty(tx.Shipment.ResponsiveLabelURL))
+    {
+      var html2 = await client.DownloadResponsiveLabelAsync(tx.Shipment.ResponsiveLabelURL);
+      await File.WriteAllTextAsync("label.html", html2);
+      Console.WriteLine("HTML etiket indirildi (PDF)");
+    }
+    // İsteğe bağlı olarak PDF de indirilebilir
+    if (!string.IsNullOrEmpty(tx.Shipment.LabelURL))
+    {
+      var pdf2 = await client.DownloadLabelAsync(tx.Shipment.LabelURL);
+      await File.WriteAllBytesAsync("label.pdf", pdf2);
+    }
+  }
+}
 
 // Test modunda her GET /shipments isteği kargo durumunu bir adım ilerletir; prod'da webhook veya kendi kontrollerinizi kullanın
 for (var i = 0; i < 5; i++) { await Task.Delay(1000); await client.Shipments.GetAsync(shipment!.Id); }

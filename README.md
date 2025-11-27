@@ -84,23 +84,18 @@ if (!string.IsNullOrEmpty(shipment!.ResponsiveLabelURL)) {
   await File.WriteAllTextAsync("label_pre.html", preHtml);
 }
 
-Dictionary<string, object>? s;
-while (true)
+var offers = shipment!.Offers ?? (await client.Shipments.GetAsync(shipment!.Id))!.Offers;
+if (offers?.Cheapest is null)
 {
-  s = await client.RequestAsync<Dictionary<string, object>>(HttpMethod.Get, $"/shipments/{shipment!.Id}");
-  var offers = s!["offers"] as Dictionary<string, object>;
-  if (offers != null && (Convert.ToInt32(offers["percentageCompleted"]) == 100 || offers.ContainsKey("cheapest"))) {
-    var cheapest = offers["cheapest"] as Dictionary<string, object>;
-    var tx = await client.Transactions.AcceptOfferAsync(cheapest!["id"].ToString()!);
-    if (tx.Shipment is not null) {
-      Console.WriteLine($"Barcode: {tx.Shipment.Barcode}");
-      Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
-      Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
-      Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
-    }
-    break;
-  }
-  await Task.Delay(1000);
+  throw new InvalidOperationException("Teklifler henüz hazır değil; GET /shipments ile tekrar kontrol edin.");
+}
+
+var tx = await client.Transactions.AcceptOfferAsync(offers.Cheapest.Id!);
+if (tx.Shipment is not null) {
+  Console.WriteLine($"Barcode: {tx.Shipment.Barcode}");
+  Console.WriteLine($"Tracking number: {tx.Shipment.TrackingNumber}");
+  Console.WriteLine($"Label URL: {tx.Shipment.LabelURL}");
+  Console.WriteLine($"Tracking URL: {tx.Shipment.TrackingUrl}");
 }
 
 // Sadece TEST için: get yaparak gönderi durumu her istekte güncellenir; Prodda webhook veya periyodik tetikleme gerekir.

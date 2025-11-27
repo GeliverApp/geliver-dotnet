@@ -84,7 +84,7 @@ if (!string.IsNullOrEmpty(shipment!.ResponsiveLabelURL)) {
   await File.WriteAllTextAsync("label_pre.html", preHtml);
 }
 
-var offers = shipment!.Offers ?? (await client.Shipments.GetAsync(shipment!.Id))!.Offers;
+var offers = shipment!.Offers;
 if (offers?.Cheapest is null)
 {
   throw new InvalidOperationException("Teklifler henüz hazır değil; GET /shipments ile tekrar kontrol edin.");

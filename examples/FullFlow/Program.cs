@@ -24,27 +24,9 @@ var shipment = await client.Shipments.CreateTestAsync(new {
 
 // Etiket indirme: Teklif kabulünden sonra (Transaction) gelen URL'leri kullanabilirsiniz de; URL'lere her shipment nesnesinin içinden ulaşılır.
 
-// Teklifler create yanıtında hazır olabilir; yoksa tek GET ile güncel shipment alın
-var typedOffers = shipment!.Offers ?? (await client.Shipments.GetAsync(shipment!.Id))?.Offers;
-Dictionary<string, object>? offersDict = null;
+// Teklifler create yanıtındaki offers alanında gelir
+var typedOffers = shipment!.Offers;
 if (typedOffers?.Cheapest is null)
-{
-  var sDict = await client.RequestAsync<Dictionary<string, object>>(HttpMethod.Get, $"/shipments/{shipment!.Id}");
-  if (sDict != null && sDict.TryGetValue("offers", out var offersRaw))
-  {
-    offersDict = offersRaw as Dictionary<string, object>;
-  }
-}
-
-string? cheapestOfferId = typedOffers?.Cheapest?.Id;
-Dictionary<string, object>? cheapestMap = null;
-if (cheapestOfferId is null && offersDict != null && offersDict.TryGetValue("cheapest", out var cheapestRaw))
-{
-  cheapestMap = cheapestRaw as Dictionary<string, object>;
-  cheapestOfferId = cheapestMap?["id"]?.ToString();
-}
-
-if (cheapestOfferId is null)
 {
   Console.WriteLine("Error: No cheapest offer available (henüz hazır değil)");
   return;
@@ -53,7 +35,7 @@ if (cheapestOfferId is null)
 Transaction? tx;
 try
 {
-  tx = await client.Transactions.AcceptOfferAsync(cheapestOfferId);
+  tx = await client.Transactions.AcceptOfferAsync(typedOffers.Cheapest.Id!);
 }
 catch (Exception ex)
 {

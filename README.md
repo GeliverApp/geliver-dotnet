@@ -167,6 +167,44 @@ var html = await client.DownloadResponsiveLabelAsync(tx!.Shipment!.ResponsiveLab
 await File.WriteAllTextAsync("label.html", html);
 ```
 
+### Gönderi Listeleme, Getir, Güncelle, İptal, Klonla
+
+- Listeleme (docs): https://docs.geliver.io/docs/shipments_and_transaction/list_shipments
+- Gönderi getir (docs): https://docs.geliver.io/docs/shipments_and_transaction/list_shipments
+- Paket güncelle (docs): https://docs.geliver.io/docs/shipments_and_transaction/update_package_shipment
+- Gönderi iptal (docs): https://docs.geliver.io/docs/shipments_and_transaction/cancel_shipment
+- Gönderi klonla (docs): https://docs.geliver.io/docs/shipments_and_transaction/clone_shipment
+
+```csharp
+// Listeleme (sayfalandırma)
+var page = await client.Shipments.ListWithEnvelopeAsync(new { page = 1, limit = 20 });
+foreach (var shipment in page?.Data ?? new List<Geliver.Sdk.Models.Shipment>())
+{
+    Console.WriteLine($"{shipment.Id} {shipment.StatusCode}");
+}
+
+// Getir
+var fetched = await client.Shipments.GetAsync("SHIPMENT_ID");
+Console.WriteLine($"Tracking: {fetched?.TrackingStatus?.TrackingStatusCode} {fetched?.TrackingStatus?.TrackingSubStatusCode}");
+
+// Paket güncelle (eni, boyu, yüksekliği ve ağırlığı string gönderin)
+await client.Shipments.UpdatePackageAsync(fetched!.Id!, new {
+    length = "12.0",
+    width = "12.0",
+    height = "10.0",
+    distanceUnit = "cm",
+    weight = "1.2",
+    massUnit = "kg",
+});
+
+// İptal
+await client.Shipments.CancelAsync(fetched.Id!);
+
+// Klonla
+var cloned = await client.Shipments.CloneAsync(fetched.Id!);
+Console.WriteLine($"Cloned shipment: {cloned?.Id}");
+```
+
 ---
 
 ## İade Gönderisi Oluşturun

@@ -391,3 +391,12 @@ public class Tracking {
   public string? TrackingSubStatusCode { get; set; }
   public string? UpdatedAt { get; set; }
 }
+
+/// <summary>WebhookUpdateTrackingRequest model</summary>
+public class WebhookUpdateTrackingRequest {
+  [JsonPropertyName("event")]
+  public string? Event { get; set; }
+  public string? Metadata { get; set; }
+  [JsonPropertyName("data")]
+  public Shipment? Data { get; set; }
+}

@@ -147,6 +147,29 @@ var createdDirect = await client.Shipments.CreateTestAsync(new {
 
 - `/webhooks/geliver` için bir controller veya minimal API endpoint'i tanımlayın; doğrulama için `Webhooks.Verify(body, headers, enableVerification: false)` kullanabilirsiniz.
 
+```csharp
+using System.Linq;
+using System.Text.Json;
+using Geliver.Sdk;
+using Geliver.Sdk.Models;
+
+app.MapPost("/webhooks/geliver", async (HttpRequest req) =>
+{
+    using var reader = new StreamReader(req.Body);
+    var body = await reader.ReadToEndAsync();
+    if (!Webhooks.Verify(body, req.Headers.ToDictionary(k => k.Key, v => string.Join(",", v.Value)), enableVerification: false))
+    {
+        return Results.BadRequest(new { status = "invalid" });
+    }
+    var evt = JsonSerializer.Deserialize<WebhookUpdateTrackingRequest>(body);
+    if (evt?.Event == "TRACK_UPDATED")
+    {
+        Console.WriteLine($"Tracking update: {evt.Data?.TrackingUrl} {evt.Data?.TrackingNumber}");
+    }
+    return Results.Ok(new { status = "ok" });
+});
+```
+
 ## Testler
 
 - Özel bir `HttpMessageHandler` enjekte ederek test yazabilirsiniz.

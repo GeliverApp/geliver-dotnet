@@ -295,7 +295,7 @@ var txPod = await client.Transactions.CreateAsync(new {
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
   providerServiceCode = "PTT_KAPIDA_ODEME",
   productPaymentOnDelivery = true,
-  order = new { orderNumber = "POD-12345", totalAmount = "150", totalAmountCurrency = "TL" },
+  order = new { orderNumber = "POD-12345", totalAmount = "150", totalAmountCurrency = "TRY" },
 });
 ```
 

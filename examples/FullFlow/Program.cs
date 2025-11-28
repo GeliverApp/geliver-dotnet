@@ -16,7 +16,7 @@ var shipment = await client.Shipments.CreateTestAsync(new {
     name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
     districtName = "Kadıköy", zip = "34000",
   },
-  order = new { orderNumber = "ABC12333322", sourceIdentifier = "https://magazaadresiniz.com", totalAmount = "150", totalAmountCurrency = "TL" },
+  order = new { orderNumber = "ABC12333322", sourceIdentifier = "https://magazaadresiniz.com", totalAmount = "150", totalAmountCurrency = "TRY" },
   // Request dimensions/weight must be strings
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm",
   weight = "1.0", massUnit = "kg",

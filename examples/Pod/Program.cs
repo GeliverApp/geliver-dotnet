@@ -6,7 +6,7 @@ var client = new GeliverClient(token);
 
 var sender = await client.Addresses.CreateSenderAsync(new {
   name = "POD Sender", email = "sender@example.com", phone = "+905000000098",
-  address1 = "Street 1", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt", zip = "34020"
+  address1 = "Hasan Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt", zip = "34020"
 });
 
 var tx = await client.Transactions.CreateAsync(new {

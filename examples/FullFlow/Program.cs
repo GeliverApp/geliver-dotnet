@@ -13,7 +13,7 @@ var sender = await client.Addresses.CreateAsync(new {
 var shipment = await client.Shipments.CreateTestAsync(new {
   senderAddressID = sender!["id"],
   recipientAddress = new {
-    name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
+    name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
     districtName = "Kadıköy", zip = "34000",
   },
   order = new { orderNumber = "ABC12333322", sourceIdentifier = "https://magazaadresiniz.com", totalAmount = "150", totalAmountCurrency = "TL" },

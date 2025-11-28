@@ -11,7 +11,7 @@ var sender = await client.Addresses.CreateSenderAsync(new {
 
 var tx = await client.Transactions.CreateAsync(new {
   senderAddressID = sender!["id"],
-  recipientAddress = new { name = "OneStep Recipient", phone = "+905000000000", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  recipientAddress = new { name = "OneStep Recipient", phone = "+905000000000", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
 });
 

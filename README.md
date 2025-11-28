@@ -32,7 +32,7 @@ var sender = await client.Addresses.CreateSenderAsync(new { name = "ACME Inc.", 
 var shipment = await client.Shipments.CreateTestAsync(new {
   sourceCode = "API",
   senderAddressID = sender!["id"],
-  recipientAddress = new { name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Kadıköy", zip = "34000" },
+  recipientAddress = new { name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Kadıköy", zip = "34000" },
   length = 10, width = 10, height = 10, distanceUnit = "cm", weight = 1, massUnit = "kg",
 });
 ```
@@ -67,7 +67,7 @@ var shipment = await client.Shipments.CreateAsync(new {
   sourceCode = "API",
   senderAddressID = sender!["id"],
   recipientAddress = new {
-    name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
+    name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
     districtName = "Kadıköy", zip = "34000",
   },
   length = 10, width = 10, height = 10, distanceUnit = "cm",
@@ -111,7 +111,7 @@ Console.WriteLine($"Final tracking status: {final!.TrackingStatus?.TrackingStatu
 ```csharp
 // Önce alıcı adresini oluşturun ve ID alın
 var recipient = await client.Addresses.CreateRecipientAsync(new {
-  name = "John Doe", email = "john@example.com", address1 = "Dest St 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
+  name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
   districtName = "Kadıköy", zip = "34000",
 });
 
@@ -229,7 +229,7 @@ catch (GeliverApiException ex)
 ```csharp
 var tx = await client.Transactions.CreateAsync(new {
   senderAddressID = sender!["id"],
-  recipientAddress = new { name = "OneStep Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  recipientAddress = new { name = "OneStep Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
 });
 ```
@@ -239,7 +239,7 @@ var tx = await client.Transactions.CreateAsync(new {
 ```csharp
 var txPod = await client.Transactions.CreateAsync(new {
   senderAddressID = sender!["id"],
-  recipientAddress = new { name = "POD Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  recipientAddress = new { name = "POD Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
   providerServiceCode = "PTT_KAPIDA_ODEME",
   productPaymentOnDelivery = true,
@@ -252,7 +252,7 @@ var txPod = await client.Transactions.CreateAsync(new {
 ```csharp
 var txOwn = await client.Transactions.CreateAsync(new {
   senderAddressID = sender!["id"],
-  recipientAddress = new { name = "OwnAg Recipient", address1 = "Dest 2", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
+  recipientAddress = new { name = "OwnAg Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
   length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
   providerServiceCode = "SURAT_STANDART",
   providerAccountID = "c0dfdb42-012d-438c-9d49-98d13b4d4a2b",

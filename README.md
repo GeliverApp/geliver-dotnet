@@ -20,7 +20,7 @@ Türkiye’nin e‑ticaret gönderim altyapısı için kolay kargo entegrasyonu 
 
 ## Kurulum
 
-- Yerelde derleme: `dotnet build sdks/csharp/src/Geliver.Sdk`
+- Yerelde derleme: `dotnet build src/Geliver.Sdk`
 
 ## Hızlı Başlangıç
 
@@ -34,6 +34,13 @@ var shipment = await client.Shipments.CreateTestAsync(new {
   senderAddressID = sender!["id"],
   recipientAddress = new { name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Kadıköy", zip = "34000" },
   length = 10, width = 10, height = 10, distanceUnit = "cm", weight = 1, massUnit = "kg",
+  order = new {
+    orderNumber = "WEB-12345",
+    // sourceIdentifier alanına mağazanızın tam adresini (ör. https://magazam.com) ekleyin.
+    sourceIdentifier = "https://magazam.com",
+    totalAmount = "150",
+    totalAmountCurrency = "TRY",
+  },
 });
 ```
 
@@ -72,6 +79,13 @@ var shipment = await client.Shipments.CreateAsync(new {
   },
   length = 10, width = 10, height = 10, distanceUnit = "cm",
   weight = 1, massUnit = "kg",
+  order = new {
+    orderNumber = "WEB-12345",
+    // sourceIdentifier alanına mağazanızın tam adresini (ör. https://magazam.com) ekleyin.
+    sourceIdentifier = "https://magazam.com",
+    totalAmount = "150",
+    totalAmountCurrency = "TRY",
+  },
 });
 
 // Etiketler bazı akışlarda create sonrasında hazır olabilir; varsa hemen indirin
@@ -223,7 +237,7 @@ catch (GeliverApiException ex)
 
 ## Örnekler
 
-- Tam akış: `sdks/csharp/examples/FullFlow/Program.cs`
+- Tam akış: `examples/FullFlow/Program.cs`
 - Tek aşamada gönderi (Create Transaction): örnek kod
 
 ```csharp

@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: csharp
     steps:
       - uses: actions/checkout@v4
         with:
@@ -15,9 +18,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - run: dotnet restore
-      - run: dotnet test --configuration Release --no-build
+      - run: dotnet restore src/Geliver.Sdk/Geliver.Sdk.csproj
+      - run: dotnet test tests/Geliver.Sdk.Tests/Geliver.Sdk.Tests.csproj --configuration Release
       - run: dotnet pack src/Geliver.Sdk/Geliver.Sdk.csproj -c Release -o ./nupkgs
       - name: Publish to NuGet
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-

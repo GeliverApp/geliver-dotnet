@@ -20,7 +20,25 @@ Türkiye’nin e‑ticaret gönderim altyapısı için kolay kargo entegrasyonu 
 
 ## Kurulum
 
-- Yerelde derleme: `dotnet build src/Geliver.Sdk`
+NuGet üzerinden yükleyin:
+
+```bash
+dotnet add package Geliver.Sdk
+```
+
+veya Package Manager Console'da:
+
+```
+Install-Package Geliver.Sdk
+```
+
+Alternatif olarak, .csproj dosyanıza manuel ekleyin:
+
+```xml
+<PackageReference Include="Geliver.Sdk" Version="*" />
+```
+
+Yerelde derleme için: `dotnet build src/Geliver.Sdk`
 
 ## Hızlı Başlangıç
 

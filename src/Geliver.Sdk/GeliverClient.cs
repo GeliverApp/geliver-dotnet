@@ -7,7 +7,7 @@ using Geliver.Sdk.Models;
 
 namespace Geliver.Sdk;
 
-public class GeliverClient
+public partial class GeliverClient
 {
     public const string DefaultBaseUrl = "https://api.geliver.io/api/v1";
 
@@ -320,9 +320,8 @@ public partial class GeliverClient
     public async Task<string> DownloadResponsiveLabelForShipmentAsync(string shipmentId, CancellationToken ct = default)
     {
         var s = await Shipments.GetAsync(shipmentId, ct);
-        var url = (s as Dictionary<string, object>)?["responsiveLabelURL"]?.ToString() ?? (s as Dictionary<string, object>)?["responsiveLabelUrl"]?.ToString();
-        if (string.IsNullOrEmpty(url)) throw new HttpRequestException("shipment has no responsiveLabelURL");
-        return await DownloadResponsiveLabelAsync(url!, ct);
+        var url = s?.ResponsiveLabelURL ?? throw new HttpRequestException("shipment has no responsiveLabelURL");
+        return await DownloadResponsiveLabelAsync(url, ct);
     }
 }
 

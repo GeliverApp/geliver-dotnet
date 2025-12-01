@@ -142,16 +142,16 @@ public class OfferList {
   public string? CreatedAt { get; set; }
   public Offer? Fastest { get; set; }
   public string? Height { get; set; }
-  public List<string> ItemIDs { get; set; }
+  public List<string>? ItemIDs { get; set; }
   public string? Length { get; set; }
-  public List<Offer> List { get; set; }
+  public List<Offer>? List { get; set; }
   public string? Owner { get; set; }
-  public List<string> ParcelIDs { get; set; }
+  public List<string>? ParcelIDs { get; set; }
   public string? ParcelTemplateID { get; set; }
   public decimal? PercentageCompleted { get; set; }
-  public List<string> ProviderAccountIDs { get; set; }
-  public List<string> ProviderCodes { get; set; }
-  public List<string> ProviderServiceCodes { get; set; }
+  public List<string>? ProviderAccountIDs { get; set; }
+  public List<string>? ProviderCodes { get; set; }
+  public List<string>? ProviderServiceCodes { get; set; }
   public bool? Test { get; set; }
   public int? TotalOffersCompleted { get; set; }
   public int? TotalOffersRequested { get; set; }
@@ -216,7 +216,7 @@ public class Parcel {
   public bool? InvoiceGenerated { get; set; }
   public string? InvoiceID { get; set; }
   public bool? IsMainParcel { get; set; }
-  public List<string> ItemIDs { get; set; }
+  public List<string>? ItemIDs { get; set; }
   public string? LabelFileType { get; set; }
   public string? LabelURL { get; set; }
   /// <summary>Length of parcel</summary>
@@ -289,7 +289,7 @@ public class Shipment {
   public string? DistanceUnit { get; set; }
   public bool? EnableAutomation { get; set; }
   public string? Eta { get; set; }
-  public List<Parcel> ExtraParcels { get; set; }
+  public List<Parcel>? ExtraParcels { get; set; }
   public bool? HasError { get; set; }
   /// <summary>Height of parcel</summary>
   public string? Height { get; set; }
@@ -301,7 +301,7 @@ public class Shipment {
   public bool? IsReturn { get; set; }
   public bool? IsReturned { get; set; }
   public bool? IsTrackingOnly { get; set; }
-  public List<Item> Items { get; set; }
+  public List<Item>? Items { get; set; }
   public string? LabelFileType { get; set; }
   public string? LabelURL { get; set; }
   public string? LastErrorCode { get; set; }
@@ -325,15 +325,15 @@ public class Shipment {
   public string? ParcelTemplateID { get; set; }
   public bool? ProductPaymentOnDelivery { get; set; }
   public string? ProviderAccountID { get; set; }
-  public List<string> ProviderAccountIDs { get; set; }
+  public List<string>? ProviderAccountIDs { get; set; }
   public string? ProviderBranchName { get; set; }
   public string? ProviderCode { get; set; }
-  public List<string> ProviderCodes { get; set; }
+  public List<string>? ProviderCodes { get; set; }
   public string? ProviderInvoiceNo { get; set; }
   public string? ProviderReceiptNo { get; set; }
   public string? ProviderSerialNo { get; set; }
   public string? ProviderServiceCode { get; set; }
-  public List<string> ProviderServiceCodes { get; set; }
+  public List<string>? ProviderServiceCodes { get; set; }
   public string? ProviderTotalAmount { get; set; }
   public string? QrCodeUrl { get; set; }
   public Address? RecipientAddress { get; set; }
@@ -346,7 +346,7 @@ public class Shipment {
   public string? SenderAddressID { get; set; }
   public string? ShipmentDate { get; set; }
   public string? StatusCode { get; set; }
-  public List<string> Tags { get; set; }
+  public List<string>? Tags { get; set; }
   public string? TenantId { get; set; }
   public bool? Test { get; set; }
   public string? TotalAmount { get; set; }
@@ -399,4 +399,77 @@ public class WebhookUpdateTrackingRequest {
   public string? Metadata { get; set; }
   [JsonPropertyName("data")]
   public Shipment? Data { get; set; }
+}
+
+/// <summary>Transaction model</summary>
+public class Transaction {
+  public string? Id { get; set; }
+  public string? Owner { get; set; }
+  public string? ShipmentID { get; set; }
+  public Shipment? Shipment { get; set; }
+  public string? OfferID { get; set; }
+  public Offer? Offer { get; set; }
+  public string? Amount { get; set; }
+  public string? AmountLocal { get; set; }
+  public string? Currency { get; set; }
+  public string? CurrencyLocal { get; set; }
+  public string? Status { get; set; }
+  public string? CreatedAt { get; set; }
+  public string? UpdatedAt { get; set; }
+  public bool? Test { get; set; }
+}
+
+/// <summary>Webhook model</summary>
+public class Webhook {
+  public string? Id { get; set; }
+  public string? Owner { get; set; }
+  public string? Url { get; set; }
+  public string? Type { get; set; }
+  public bool? IsActive { get; set; }
+  public string? CreatedAt { get; set; }
+  public string? UpdatedAt { get; set; }
+  public bool? Test { get; set; }
+}
+
+/// <summary>ProviderAccount model</summary>
+public class ProviderAccount {
+  public string? Id { get; set; }
+  public string? Owner { get; set; }
+  public string? ProviderCode { get; set; }
+  public string? AccountName { get; set; }
+  public string? AccountType { get; set; }
+  public bool? IsActive { get; set; }
+  public JSONContent? Credentials { get; set; }
+  public JSONContent? Settings { get; set; }
+  public string? CreatedAt { get; set; }
+  public string? UpdatedAt { get; set; }
+  public bool? Test { get; set; }
+}
+
+/// <summary>ParcelTemplate model</summary>
+public class ParcelTemplate {
+  public string? Id { get; set; }
+  public string? Owner { get; set; }
+  public string? Name { get; set; }
+  public string? Length { get; set; }
+  public string? Width { get; set; }
+  public string? Height { get; set; }
+  public string? Weight { get; set; }
+  public string? DistanceUnit { get; set; }
+  public string? MassUnit { get; set; }
+  public string? CreatedAt { get; set; }
+  public string? UpdatedAt { get; set; }
+  public bool? Test { get; set; }
+}
+
+/// <summary>Organization model</summary>
+public class Organization {
+  public string? Id { get; set; }
+  public string? Name { get; set; }
+  public string? Owner { get; set; }
+  public string? Balance { get; set; }
+  public string? Currency { get; set; }
+  public string? CreatedAt { get; set; }
+  public string? UpdatedAt { get; set; }
+  public bool? Test { get; set; }
 }

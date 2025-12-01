@@ -15,8 +15,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - run: dotnet restore src/Geliver.Sdk/Geliver.Sdk.csproj
-      - run: dotnet test tests/Geliver.Sdk.Tests/Geliver.Sdk.Tests.csproj --configuration Release
-      - run: dotnet pack src/Geliver.Sdk/Geliver.Sdk.csproj -c Release -o ./nupkgs
+      - run: dotnet restore Geliver.Sdk.sln
+      - run: dotnet test Geliver.Sdk.sln --configuration Release --no-restore
+      - run: dotnet pack src/Geliver.Sdk/Geliver.Sdk.csproj -c Release -o ./nupkgs --no-restore
       - name: Publish to NuGet
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

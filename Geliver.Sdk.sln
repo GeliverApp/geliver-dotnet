@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geliver.Sdk", "src\Geliver.Sdk\Geliver.Sdk.csproj", "{8B9E6A8F-9F3E-4C8D-9E3B-5F9E6A8F9F3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geliver.Sdk.Tests", "tests\Geliver.Sdk.Tests\Geliver.Sdk.Tests.csproj", "{9C0E7B9F-AF4E-5D9E-AE4C-6FAF7B9FAF4F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B9E6A8F-9F3E-4C8D-9E3B-5F9E6A8F9F3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B9E6A8F-9F3E-4C8D-9E3B-5F9E6A8F9F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B9E6A8F-9F3E-4C8D-9E3B-5F9E6A8F9F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B9E6A8F-9F3E-4C8D-9E3B-5F9E6A8F9F3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C0E7B9F-AF4E-5D9E-AE4C-6FAF7B9FAF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C0E7B9F-AF4E-5D9E-AE4C-6FAF7B9FAF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C0E7B9F-AF4E-5D9E-AE4C-6FAF7B9FAF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C0E7B9F-AF4E-5D9E-AE4C-6FAF7B9FAF4F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

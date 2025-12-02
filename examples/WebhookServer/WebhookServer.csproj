@@ -4,5 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Geliver.Sdk/Geliver.Sdk.csproj" />
+  </ItemGroup>
 </Project>
 

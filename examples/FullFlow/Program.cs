@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Geliver.Sdk;
+using Geliver.Sdk.Models;
 
 var token = Environment.GetEnvironmentVariable("GELIVER_TOKEN") ?? "YOUR_TOKEN";
 var client = new GeliverClient(token);

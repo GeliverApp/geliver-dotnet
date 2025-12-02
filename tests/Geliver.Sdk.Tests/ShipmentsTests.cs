@@ -9,7 +9,9 @@ class FakeHandler : HttpMessageHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (request.RequestUri!.AbsolutePath == "/shipments")
+        var path = request.RequestUri!.AbsolutePath;
+        // Handle both absolute and relative paths
+        if (path.EndsWith("/shipments") || path == "/shipments")
         {
             var json = "{\"result\":true, \"data\":[{\"id\":\"s1\"}]}";
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){ Content = new StringContent(json) });

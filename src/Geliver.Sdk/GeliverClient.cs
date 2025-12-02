@@ -44,7 +44,7 @@ public partial class GeliverClient
 
     internal async Task<T?> RequestAsync<T>(HttpMethod method, string path, object? query = null, object? body = null, CancellationToken ct = default)
     {
-        var url = path;
+        var url = (_http.BaseAddress?.ToString() ?? DefaultBaseUrl).TrimEnd('/') + path;
         if (query != null)
         {
             var pairs = from p in query.GetType().GetProperties()
@@ -54,12 +54,13 @@ public partial class GeliverClient
             var qs = string.Join("&", pairs);
             if (!string.IsNullOrEmpty(qs)) url += "?" + qs;
         }
-        var content = body != null ? new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json") : null;
-        var req = new HttpRequestMessage(method, url) { Content = content };
+        var jsonBody = body != null ? JsonSerializer.Serialize(body) : null;
 
         var attempt = 0;
         while (true)
         {
+            var content = jsonBody != null ? new StringContent(jsonBody, Encoding.UTF8, "application/json") : null;
+            var req = new HttpRequestMessage(method, url) { Content = content };
             var res = await _http.SendAsync(req, ct);
             var text = await res.Content.ReadAsStringAsync(ct);
             using var doc = JsonDocument.Parse(string.IsNullOrEmpty(text) ? "{}" : text);

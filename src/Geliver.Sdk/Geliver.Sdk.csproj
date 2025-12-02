@@ -6,6 +6,19 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Geliver.Sdk</AssemblyName>
     <RootNamespace>Geliver.Sdk</RootNamespace>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>Geliver.Sdk</PackageId>
+    <Version>1.0.1</Version>
+    <Authors>Geliver</Authors>
+    <Company>Geliver A.Ş</Company>
+    <Description>Official C# SDK for Geliver shipping and logistics API</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/geliverapp/geliver-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/geliverapp/geliver-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>geliver;kargo;shipping;logistics;api;sdk</PackageTags>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 </Project>
 

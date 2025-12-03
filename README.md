@@ -320,35 +320,35 @@ catch (GeliverApiException ex)
 - Tek aşamada gönderi (Create Transaction): örnek kod
 
 ```csharp
-var tx = await client.Transactions.CreateAsync(new {
-  senderAddressID = sender!["id"],
-  recipientAddress = new { name = "OneStep Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
-  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
+var tx = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShipmentWithRecipientAddress {
+  SenderAddressID = Convert.ToString(sender!["id"]) ?? string.Empty,
+  RecipientAddress = new RecipientAddressRequest { Name = "OneStep Recipient", Phone = "+905000000000", Address1 = "Atatürk Mahallesi", CountryCode = "TR", CityName = "Istanbul", CityCode = "34", DistrictName = "Esenyurt" },
+  Length = "10.0", Width = "10.0", Height = "10.0", DistanceUnit = "cm", Weight = "1.0", MassUnit = "kg",
 });
 ```
 
 - Kapıda ödeme: örnek kod
 
 ```csharp
-var txPod = await client.Transactions.CreateAsync(new {
-  senderAddressID = sender!["id"],
-  recipientAddress = new { name = "POD Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
-  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
-  providerServiceCode = "PTT_KAPIDA_ODEME",
-  productPaymentOnDelivery = true,
-  order = new { orderNumber = "POD-12345", totalAmount = "150", totalAmountCurrency = "TRY" },
+var txPod = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShipmentWithRecipientAddress {
+  SenderAddressID = Convert.ToString(sender!["id"]) ?? string.Empty,
+  RecipientAddress = new RecipientAddressRequest { Name = "POD Recipient", Phone = "+905000000001", Address1 = "Atatürk Mahallesi", CountryCode = "TR", CityName = "Istanbul", CityCode = "34", DistrictName = "Esenyurt" },
+  Length = "10.0", Width = "10.0", Height = "10.0", DistanceUnit = "cm", Weight = "1.0", MassUnit = "kg",
+  ProviderServiceCode = "PTT_KAPIDA_ODEME",
+  ProductPaymentOnDelivery = true,
+  Order = new OrderRequest { OrderNumber = "POD-12345", TotalAmount = "150", TotalAmountCurrency = "TRY" },
 });
 ```
 
 - Kendi anlaşmanızla etiket satın alma: örnek kod
 
 ```csharp
-var txOwn = await client.Transactions.CreateAsync(new {
-  senderAddressID = sender!["id"],
-  recipientAddress = new { name = "OwnAg Recipient", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt" },
-  length = "10.0", width = "10.0", height = "10.0", distanceUnit = "cm", weight = "1.0", massUnit = "kg",
-  providerServiceCode = "SURAT_STANDART",
-  providerAccountID = "c0dfdb42-012d-438c-9d49-98d13b4d4a2b",
+var txOwn = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShipmentWithRecipientAddress {
+  SenderAddressID = Convert.ToString(sender!["id"]) ?? string.Empty,
+  RecipientAddress = new RecipientAddressRequest { Name = "OwnAg Recipient", Phone = "+905000000002", Address1 = "Atatürk Mahallesi", CountryCode = "TR", CityName = "Istanbul", CityCode = "34", DistrictName = "Esenyurt" },
+  Length = "10.0", Width = "10.0", Height = "10.0", DistanceUnit = "cm", Weight = "1.0", MassUnit = "kg",
+  ProviderServiceCode = "SURAT_STANDART",
+  ProviderAccountID = "c0dfdb42-012d-438c-9d49-98d13b4d4a2b",
 });
 ```
 

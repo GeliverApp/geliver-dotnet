@@ -120,24 +120,24 @@ public static class Webhooks
     }
 }
 
-public class ShipmentsResource
+internal static class ShipmentRequestHelpers
 {
-    private readonly GeliverClient _c;
-    internal ShipmentsResource(GeliverClient c) { _c = c; }
-
-    public Task<Models.Shipment?> CreateAsync(object body, CancellationToken ct = default)
+    public static Dictionary<string, object?> Normalize(object body, bool isTest = false)
     {
-        var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
-        if (dict.TryGetValue("recipientAddress", out var ra) && ra is Dictionary<string, object> rad)
+        var dict = ToDictionary(body);
+        if (dict.TryGetValue("recipientAddress", out var ra) && ra is not null)
         {
-            if (!rad.TryGetValue("phone", out var ph) || string.IsNullOrWhiteSpace(Convert.ToString(ph)))
+            var recipientDict = ToDictionary(ra);
+            if (!recipientDict.TryGetValue("phone", out var phone) || string.IsNullOrWhiteSpace(Convert.ToString(phone)))
             {
                 throw new ArgumentException("recipientAddress.phone is required");
             }
+            dict["recipientAddress"] = recipientDict;
         }
-        if (dict.TryGetValue("order", out var orderObj) && orderObj is Dictionary<string, object> orderDict)
+        if (dict.TryGetValue("order", out var orderObj) && orderObj is not null)
         {
-            if (!orderDict.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict["sourceCode"])))
+            var orderDict = ToDictionary(orderObj);
+            if (!orderDict.TryGetValue("sourceCode", out var sourceCode) || string.IsNullOrWhiteSpace(Convert.ToString(sourceCode)))
             {
                 orderDict["sourceCode"] = "API";
             }
@@ -147,6 +147,37 @@ public class ShipmentsResource
         {
             if (dict.TryGetValue(k, out var v) && v is not null) dict[k] = Convert.ToString(v)!;
         }
+        if (isTest) dict["test"] = true;
+        return dict;
+    }
+
+    public static Dictionary<string, object?> ToDictionary(object body)
+    {
+        if (body is null) throw new ArgumentNullException(nameof(body));
+        if (body is IDictionary<string, object?> dict) return new Dictionary<string, object?>(dict, StringComparer.Ordinal);
+        if (body is IDictionary<string, object> dictObj) return dictObj.ToDictionary(k => k.Key, v => (object?)v.Value, StringComparer.Ordinal);
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var prop in body.GetType().GetProperties())
+        {
+            var name = prop.Name;
+            if (!string.IsNullOrEmpty(name))
+            {
+                name = char.ToLowerInvariant(name[0]) + name.Substring(1);
+            }
+            result[name] = prop.GetValue(body);
+        }
+        return result;
+    }
+}
+
+public class ShipmentsResource
+{
+    private readonly GeliverClient _c;
+    internal ShipmentsResource(GeliverClient c) { _c = c; }
+
+    public Task<Models.Shipment?> CreateAsync(object body, CancellationToken ct = default)
+    {
+        var dict = ShipmentRequestHelpers.Normalize(body);
         return _c.RequestAsync<Models.Shipment>(HttpMethod.Post, "/shipments", null, dict, ct);
     }
     public Task<Models.Shipment?> GetAsync(string shipmentId, CancellationToken ct = default) => _c.RequestAsync<Models.Shipment>(HttpMethod.Get, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, null, ct);
@@ -177,27 +208,7 @@ public class ShipmentsResource
     /// <summary>Create a test shipment by injecting test=true.</summary>
     public Task<Models.Shipment?> CreateTestAsync(object body, CancellationToken ct = default)
     {
-        var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
-        if (dict.TryGetValue("recipientAddress", out var ra2) && ra2 is Dictionary<string, object> rad2)
-        {
-            if (!rad2.TryGetValue("phone", out var ph2) || string.IsNullOrWhiteSpace(Convert.ToString(ph2)))
-            {
-                throw new ArgumentException("recipientAddress.phone is required");
-            }
-        }
-        if (dict.TryGetValue("order", out var orderObj2) && orderObj2 is Dictionary<string, object> orderDict2)
-        {
-            if (!orderDict2.ContainsKey("sourceCode") || string.IsNullOrEmpty(Convert.ToString(orderDict2["sourceCode"])))
-            {
-                orderDict2["sourceCode"] = "API";
-            }
-            dict["order"] = orderDict2;
-        }
-        foreach (var k in new[] { "length", "width", "height", "weight" })
-        {
-            if (dict.TryGetValue(k, out var v) && v is not null) dict[k] = Convert.ToString(v)!;
-        }
-        dict["test"] = true;
+        var dict = ShipmentRequestHelpers.Normalize(body, isTest: true);
         return _c.RequestAsync<Models.Shipment>(HttpMethod.Post, "/shipments", null, dict, ct);
     }
 
@@ -253,7 +264,17 @@ public class TransactionsResource
     public Task<Models.Transaction?> AcceptOfferAsync(string offerId, CancellationToken ct = default) => _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, new { offerID = offerId }, ct);
 
     /// <summary>One-step label purchase: post shipment details directly to /transactions.</summary>
-    public Task<Models.Transaction?> CreateAsync(object body, CancellationToken ct = default) => _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, body, ct);
+    public Task<Models.Transaction?> CreateAsync(object body, CancellationToken ct = default)
+    {
+        var dict = ShipmentRequestHelpers.Normalize(body);
+        return _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, dict, ct);
+    }
+
+    /// <summary>Typed helper for one-step purchase with inline recipient address.</summary>
+    public Task<Models.Transaction?> CreateWithRecipientAddressAsync(CreateShipmentWithRecipientAddress body, CancellationToken ct = default) => CreateAsync(body, ct);
+
+    /// <summary>Typed helper for one-step purchase using a saved recipient address.</summary>
+    public Task<Models.Transaction?> CreateWithRecipientIDAsync(CreateShipmentWithRecipientID body, CancellationToken ct = default) => CreateAsync(body, ct);
 }
 
 public class AddressesResource

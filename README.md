@@ -48,7 +48,6 @@ using Geliver.Sdk;
 var client = new GeliverClient(token: "YOUR_TOKEN");
 var sender = await client.Addresses.CreateSenderAsync(new { name = "ACME Inc.", email = "ops@acme.test", phone = "+905051234567", address1 = "Hasan Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Esenyurt", zip = "34020" });
 var shipment = await client.Shipments.CreateTestAsync(new {
-  sourceCode = "API",
   senderAddressID = sender!["id"],
   recipientAddress = new { name = "John Doe", email = "john@example.com", phone = "+905051234568", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34", districtName = "Kadıköy", zip = "34000" },
   length = 10, width = 10, height = 10, distanceUnit = "cm", weight = 1, massUnit = "kg",
@@ -88,8 +87,8 @@ var sender = await client.Addresses.CreateSenderAsync(new {
 });
 
 // 2) Alıcı adres bilgileri ile Gönderi oluşturun
-var shipment = await client.Shipments.CreateAsync(new {
-  sourceCode = "API",
+// Canlıda CreateTestAsync yerine CreateAsync kullanılmalı.
+var shipment = await client.Shipments.CreateTestAsync(new {
   senderAddressID = sender!["id"],
   recipientAddress = new {
     name = "John Doe", email = "john@example.com", address1 = "Atatürk Mahallesi", countryCode = "TR", cityName = "Istanbul", cityCode = "34",
@@ -150,7 +149,6 @@ var recipient = await client.Addresses.CreateRecipientAsync(new {
 // Ardından recipientAddressID ile gönderi oluşturun
 // Canlı ortamda CreateTestAsync yerine CreateAsync kullanın.
 var createdDirect = await client.Shipments.CreateTestAsync(new {
-  sourceCode = "API",
   senderAddressID = sender!["id"],
   recipientAddressID = recipient!["id"],
   providerServiceCode = "MNG_STANDART",

@@ -266,8 +266,40 @@ public class TransactionsResource
     /// <summary>One-step label purchase: post shipment details directly to /transactions.</summary>
     public Task<Models.Transaction?> CreateAsync(object body, CancellationToken ct = default)
     {
-        var dict = ShipmentRequestHelpers.Normalize(body);
-        return _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, dict, ct);
+        var top = ShipmentRequestHelpers.ToDictionary(body);
+        object? wrapperProviderAccountID = null;
+        object? wrapperProviderServiceCode = null;
+        Dictionary<string, object?> dict;
+        if (top.TryGetValue("shipment", out var shipmentObj) && shipmentObj is not null)
+        {
+            top.TryGetValue("providerAccountID", out wrapperProviderAccountID);
+            top.TryGetValue("providerServiceCode", out wrapperProviderServiceCode);
+            dict = ShipmentRequestHelpers.Normalize(shipmentObj);
+        }
+        else
+        {
+            dict = ShipmentRequestHelpers.Normalize(body);
+        }
+        var wrapper = new Dictionary<string, object?> { ["shipment"] = dict };
+        if (wrapperProviderAccountID is null && dict.TryGetValue("providerAccountID", out var providerAccountID) && providerAccountID is not null)
+        {
+            wrapperProviderAccountID = providerAccountID;
+        }
+        if (wrapperProviderAccountID is not null)
+        {
+            wrapper["providerAccountID"] = wrapperProviderAccountID;
+            dict.Remove("providerAccountID");
+        }
+        if (wrapperProviderServiceCode is null && dict.TryGetValue("providerServiceCode", out var providerServiceCode) && providerServiceCode is not null)
+        {
+            wrapperProviderServiceCode = providerServiceCode;
+        }
+        if (wrapperProviderServiceCode is not null)
+        {
+            wrapper["providerServiceCode"] = wrapperProviderServiceCode;
+            dict.Remove("providerServiceCode");
+        }
+        return _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, wrapper, ct);
     }
 
     /// <summary>Typed helper for one-step purchase with inline recipient address.</summary>

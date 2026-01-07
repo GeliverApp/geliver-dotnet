@@ -322,6 +322,7 @@ var tx = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShi
   SenderAddressID = Convert.ToString(sender!["id"]) ?? string.Empty,
   RecipientAddress = new RecipientAddressRequest { Name = "OneStep Recipient", Phone = "+905000000000", Address1 = "Atatürk Mahallesi", CountryCode = "TR", CityName = "Istanbul", CityCode = "34", DistrictName = "Esenyurt" },
   Length = "10.0", Width = "10.0", Height = "10.0", DistanceUnit = "cm", Weight = "1.0", MassUnit = "kg",
+  Test = true,
 });
 ```
 

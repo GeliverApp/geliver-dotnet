@@ -25,7 +25,6 @@ var tx = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShi
   Weight = "1.0", MassUnit = "kg",
   ProviderServiceCode = "SURAT_STANDART",
   ProviderAccountID = "c0dfdb42-012d-438c-9d49-98d13b4d4a2b",
-  Test = true,
 });
 
 Console.WriteLine($"transaction id: {tx?.Id}");

@@ -26,7 +26,6 @@ var tx = await client.Transactions.CreateWithRecipientAddressAsync(new CreateShi
   ProviderServiceCode = "PTT_KAPIDA_ODEME",
   ProductPaymentOnDelivery = true,
   Order = new OrderRequest { OrderNumber = "POD-12345", TotalAmount = "150", TotalAmountCurrency = "TRY" },
-  Test = true,
 });
 
 Console.WriteLine($"transaction id: {tx?.Id}");

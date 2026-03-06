@@ -10,6 +10,7 @@ namespace Geliver.Sdk;
 public partial class GeliverClient
 {
     public const string DefaultBaseUrl = "https://api.geliver.io/api/v1";
+    public const string Version = "1.1.2";
 
     private readonly HttpClient _http;
     private readonly int _maxRetries;
@@ -29,6 +30,10 @@ public partial class GeliverClient
         _http = httpClient ?? new HttpClient { BaseAddress = new Uri((baseUrl ?? DefaultBaseUrl).TrimEnd('/')) };
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        if (!_http.DefaultRequestHeaders.UserAgent.Any())
+        {
+            _http.DefaultRequestHeaders.UserAgent.ParseAdd($"geliver-csharp/{Version}");
+        }
         _maxRetries = maxRetries;
 
         Shipments = new ShipmentsResource(this);
@@ -139,7 +144,7 @@ internal static class ShipmentRequestHelpers
             var orderDict = ToDictionary(orderObj);
             if (!orderDict.TryGetValue("sourceCode", out var sourceCode) || string.IsNullOrWhiteSpace(Convert.ToString(sourceCode)))
             {
-                orderDict["sourceCode"] = "API";
+                orderDict["sourceCode"] = "SDK";
             }
             dict["order"] = orderDict;
         }
@@ -197,12 +202,13 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CancelAsync(string shipmentId, CancellationToken ct = default) => _c.RequestAsync<Models.Shipment>(HttpMethod.Delete, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, null, ct);
     public Task<Models.Shipment?> CloneAsync(string shipmentId, CancellationToken ct = default) => _c.RequestAsync<Models.Shipment>(HttpMethod.Post, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, null, ct);
 
-    /// <summary>Create return shipment (PATCH with isReturn=true).</summary>
+    /// <summary>Create return shipment (POST with isReturn=true).</summary>
     public Task<Models.Shipment?> CreateReturnAsync(string shipmentId, object body, CancellationToken ct = default)
     {
-        var dict = body.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(body));
+        var dict = ShipmentRequestHelpers.ToDictionary(body);
         dict["isReturn"] = true;
-        return _c.RequestAsync<Models.Shipment>(HttpMethod.Patch, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, dict, ct);
+        if (!dict.TryGetValue("count", out var countObj) || countObj is null || (countObj is int i && i <= 0)) dict["count"] = 1;
+        return _c.RequestAsync<Models.Shipment>(HttpMethod.Post, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, dict, ct);
     }
 
     /// <summary>Create a test shipment by injecting test=true.</summary>

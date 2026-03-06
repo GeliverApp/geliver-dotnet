@@ -252,14 +252,15 @@ Console.WriteLine($"Cloned shipment: {cloned?.Id}");
 var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new {
   willAccept = true,
   providerServiceCode = "SURAT_STANDART",
-  count = 1,
 });
 ```
 
 Not:
 
+- `willAccept` alanı opsiyoneldir (varsayılan `false`). `true` ise backend iade için uygun teklifi otomatik kabul eder (etiket satın alma). `false` ise sadece iade shipment’i oluşturur; daha sonra `client.Transactions.AcceptOfferAsync(offerId)` ile kabul edebilirsiniz.
 - `providerServiceCode` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin sağlayıcısı kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
 - `senderAddress` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin alıcı adresi kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
+- `count` alanı opsiyoneldir (varsayılan `1`). Bu fonksiyon “tek shipment için tek iade” akışı içindir; genelde `1` kullanılmalıdır.
 
 ## Modeller
 

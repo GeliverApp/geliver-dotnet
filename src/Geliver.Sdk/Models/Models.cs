@@ -413,6 +413,12 @@ public class Transaction {
   public string? AmountLocal { get; set; }
   public string? Currency { get; set; }
   public string? CurrencyLocal { get; set; }
+  public string? Description { get; set; }
+  public bool? IsRefund { get; set; }
+  public bool? IsCustomAccountCharge { get; set; }
+  public bool? IsPayed { get; set; }
+  public string? PayedVia { get; set; }
+  public string? TransactionType { get; set; }
   public string? Status { get; set; }
   public string? CreatedAt { get; set; }
   public string? UpdatedAt { get; set; }

@@ -9,7 +9,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>Geliver.Sdk</PackageId>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <Authors>Geliver</Authors>
     <Company>Geliver A.Ş</Company>
     <Description>Official C# SDK for Geliver shipping and logistics API</Description>

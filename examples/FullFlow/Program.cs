@@ -23,6 +23,8 @@ var shipment = await client.Shipments.CreateTestAsync(new {
   weight = "1.0", massUnit = "kg",
 });
 
+Console.WriteLine($"Shipment {shipment!.Id}");
+
 // Etiket indirme: Teklif kabulünden sonra (Transaction) gelen URL'leri kullanabilirsiniz de; URL'lere her shipment nesnesinin içinden ulaşılır.
 
 // Teklifler create yanıtındaki offers alanında gelir

@@ -10,7 +10,7 @@ namespace Geliver.Sdk;
 public partial class GeliverClient
 {
     public const string DefaultBaseUrl = "https://api.geliver.io/api/v1";
-    public const string Version = "1.1.2";
+    public const string Version = "1.1.3";
 
     private readonly HttpClient _http;
     private readonly int _maxRetries;
@@ -202,10 +202,15 @@ public class ShipmentsResource
     public Task<Models.Shipment?> CancelAsync(string shipmentId, CancellationToken ct = default) => _c.RequestAsync<Models.Shipment>(HttpMethod.Delete, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, null, ct);
     public Task<Models.Shipment?> CloneAsync(string shipmentId, CancellationToken ct = default) => _c.RequestAsync<Models.Shipment>(HttpMethod.Post, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, null, ct);
 
-    /// <summary>Create return shipment (POST with isReturn=true).</summary>
+    /// <summary>Create a return shipment without purchasing the label yet. Use Transactions.CreateReturnAsync to purchase it immediately.</summary>
     public Task<Models.Shipment?> CreateReturnAsync(string shipmentId, object body, CancellationToken ct = default)
     {
         var dict = ShipmentRequestHelpers.ToDictionary(body);
+        if (dict.TryGetValue("willAccept", out var willAcceptObj) && willAcceptObj is bool willAccept && willAccept)
+        {
+            throw new ArgumentException("Shipments.CreateReturnAsync does not support willAccept=true. Use Transactions.CreateReturnAsync instead.");
+        }
+        dict.Remove("willAccept");
         dict["isReturn"] = true;
         if (!dict.TryGetValue("count", out var countObj) || countObj is null || (countObj is int i && i <= 0)) dict["count"] = 1;
         return _c.RequestAsync<Models.Shipment>(HttpMethod.Post, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, dict, ct);
@@ -268,6 +273,16 @@ public class TransactionsResource
     private readonly GeliverClient _c;
     internal TransactionsResource(GeliverClient c) { _c = c; }
     public Task<Models.Transaction?> AcceptOfferAsync(string offerId, CancellationToken ct = default) => _c.RequestAsync<Models.Transaction>(HttpMethod.Post, "/transactions", null, new { offerID = offerId }, ct);
+
+    /// <summary>Create a return shipment and purchase the label immediately. Returns the created Transaction.</summary>
+    public Task<Models.Transaction?> CreateReturnAsync(string shipmentId, object body, CancellationToken ct = default)
+    {
+        var dict = ShipmentRequestHelpers.ToDictionary(body);
+        dict["isReturn"] = true;
+        dict["willAccept"] = true;
+        if (!dict.TryGetValue("count", out var countObj) || countObj is null || (countObj is int i && i <= 0)) dict["count"] = 1;
+        return _c.RequestAsync<Models.Transaction>(HttpMethod.Post, $"/shipments/{Uri.EscapeDataString(shipmentId)}", null, dict, ct);
+    }
 
     /// <summary>One-step label purchase: post shipment details directly to /transactions.</summary>
     public Task<Models.Transaction?> CreateAsync(object body, CancellationToken ct = default)

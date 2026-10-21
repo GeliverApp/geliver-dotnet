@@ -40,15 +40,14 @@ class CaptureOnceHandler : HttpMessageHandler
 public class ShipmentsTests
 {
     [Fact]
-    public async Task AllNewShipmentFlowsRequireOneAddressPerSide()
+    public async Task NewShipmentFlowsRequireRecipientAndAllowDefaultSender()
     {
         var client = new GeliverClient("test");
         var invalid = new object[]
         {
-            new CreateShipmentWithRecipientID { RecipientAddressID = "merchant-1" },
-            new CreateShipmentWithRecipientID { SenderAddressID = "customer-1", SenderAddress = new SenderAddressRequest { Address1 = "A" }, RecipientAddressID = "merchant-1" },
-            new CreateShipmentWithRecipientID { SenderAddressID = "customer-1" },
-            new { SenderAddressID = "customer-1", RecipientAddressID = "merchant-1", RecipientAddress = new RecipientAddressRequest { Address1 = "B" } },
+            new CreateShipmentWithRecipientID { SenderAddressID = "merchant-1", SenderAddress = new SenderAddressRequest { Address1 = "A" }, RecipientAddressID = "customer-1" },
+            new CreateShipmentWithRecipientID { SenderAddressID = "merchant-1" },
+            new { SenderAddressID = "merchant-1", RecipientAddressID = "customer-1", RecipientAddress = new RecipientAddressRequest { Address1 = "B" } },
         };
 
         foreach (var body in invalid)
@@ -65,14 +64,15 @@ public class ShipmentsTests
         var handler = new CaptureOnceHandler();
         var http = new HttpClient(handler) { BaseAddress = new Uri(GeliverClient.DefaultBaseUrl) };
         var client = new GeliverClient("test", httpClient: http);
-        var customer = new SenderAddressRequest { Name = "Customer", Phone = "+905051234567", Address1 = "A" };
-        var merchant = new RecipientAddressRequest { Name = "Merchant", Phone = "+905051234568", Address1 = "B" };
+        var merchant = new SenderAddressRequest { Name = "Merchant", Phone = "+905051234567", Address1 = "A" };
+        var customer = new RecipientAddressRequest { Name = "Customer", Phone = "+905051234568", Address1 = "B" };
         var cases = new (object Body, string SenderKey, string RecipientKey)[]
         {
-            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddressID = "customer-1", RecipientAddressID = "merchant-1" }, "senderAddressID", "recipientAddressID"),
-            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddressID = "customer-1", RecipientAddress = merchant }, "senderAddressID", "recipientAddress"),
-            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddress = customer, RecipientAddressID = "merchant-1" }, "senderAddress", "recipientAddressID"),
-            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddress = customer, RecipientAddress = merchant }, "senderAddress", "recipientAddress"),
+            (new CreateShipmentWithRecipientAddress { IsReturn = true, RecipientAddress = customer }, "", "recipientAddress"),
+            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddressID = "merchant-1", RecipientAddressID = "customer-1" }, "senderAddressID", "recipientAddressID"),
+            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddressID = "merchant-1", RecipientAddress = customer }, "senderAddressID", "recipientAddress"),
+            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddress = merchant, RecipientAddressID = "customer-1" }, "senderAddress", "recipientAddressID"),
+            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddress = merchant, RecipientAddress = customer }, "senderAddress", "recipientAddress"),
         };
 
         foreach (var (request, senderKey, recipientKey) in cases)
@@ -95,15 +95,14 @@ public class ShipmentsTests
         var http = new HttpClient(handler) { BaseAddress = new System.Uri(GeliverClient.DefaultBaseUrl) };
         var client = new GeliverClient("test", httpClient: http);
 
-        await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID
+        await client.Shipments.CreateAsync(new CreateShipmentWithRecipientAddress
         {
             IsReturn = true,
-            SenderAddress = new SenderAddressRequest
+            RecipientAddress = new RecipientAddressRequest
             {
                 Name = "Customer", Phone = "+905051234567", Address1 = "A",
                 CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy",
             },
-            RecipientAddressID = "merchant-1",
         });
 
         Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
@@ -111,8 +110,8 @@ public class ShipmentsTests
         using var doc = JsonDocument.Parse(handler.LastBody!);
         var body = doc.RootElement;
         Assert.True(body.GetProperty("isReturn").GetBoolean());
-        Assert.Equal("Customer", body.GetProperty("senderAddress").GetProperty("name").GetString());
-        Assert.Equal("merchant-1", body.GetProperty("recipientAddressID").GetString());
+        Assert.Equal("Customer", body.GetProperty("recipientAddress").GetProperty("name").GetString());
+        Assert.False(body.TryGetProperty("senderAddress", out var senderAddress) && senderAddress.ValueKind != JsonValueKind.Null);
         Assert.False(body.TryGetProperty("senderAddressID", out var senderID) && senderID.ValueKind != JsonValueKind.Null);
     }
 

@@ -77,7 +77,7 @@ Canlı ortamda `CreateTestAsync(...)` yerine `Shipments.CreateAsync(...)` çağ�
 
 ### Gönderi adresi seçimi
 
-Yeni gönderide gönderici için `SenderAddressID` veya satır içi `SenderAddress`; alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` verin. Dört kombinasyon da desteklenir; her taraf için yalnızca bir adres seçin. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın.
+Yeni gönderide alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` alanlarından birini verin. Gönderici için `SenderAddressID` veya `SenderAddress` kullanabilirsiniz; ikisini de vermezseniz backend kurumun varsayılan gönderici adresini kullanır. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın.
 
 ```csharp
 using Geliver.Sdk;
@@ -259,22 +259,21 @@ Listeleme parametreleri:
 
 ## Referans gönderi olmadan kargo bana gelecek
 
-Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. `IsReturn` adresleri otomatik değiştirmez. Aşağıdaki örnekte müşteri adresi satır içi, sizin adresiniz kayıtlıdır. `Test = true` yalnızca test içindir.
+Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. İadede `RecipientAddress` müşterinin kargonun alınacağı adresidir; `SenderAddress` sizin teslim adresinizdir. Backend taşıyıcı için yönü ters çevirir. Aşağıdaki örnek sizin için varsayılan gönderici adresini kullanır. `Test = true` yalnızca test içindir.
 
 ```csharp
-var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID {
+var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientAddress {
   IsReturn = true,
   Test = true,
-  SenderAddress = new SenderAddressRequest {
+  RecipientAddress = new RecipientAddressRequest {
     Name = "Müşteri Adı", Email = "customer@example.com", Phone = "+905051234567",
     Address1 = "Örnek Mahallesi 1", CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy", Zip = "34000",
   },
-  RecipientAddressID = merchantAddressID,
   Length = "10", Width = "10", Height = "10", DistanceUnit = "cm", Weight = "1", MassUnit = "kg",
 });
 ```
 
-Çalıştırılabilir örnek: `GELIVER_TOKEN=... GELIVER_MERCHANT_ADDRESS_ID=... dotnet run --project examples/IncomingShipment/IncomingShipment.csproj`. Etiketi satın almak için teklif kabul akışını kullanın.
+Çalıştırılabilir örnek: `GELIVER_TOKEN=... dotnet run --project examples/IncomingShipment/IncomingShipment.csproj`. Etiketi satın almak için teklif kabul akışını kullanın.
 
 ## Var olan gönderiye bağlı iade oluşturun
 

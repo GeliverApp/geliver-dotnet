@@ -10,7 +10,7 @@ namespace Geliver.Sdk;
 public partial class GeliverClient
 {
     public const string DefaultBaseUrl = "https://api.geliver.io/api/v1";
-    public const string Version = "1.1.3";
+    public const string Version = "1.2.0";
 
     private readonly HttpClient _http;
     private readonly int _maxRetries;

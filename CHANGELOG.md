@@ -6,10 +6,15 @@ This file documents notable changes in the SDK.
 
 ## Sürüm / Version
 
-- Türkçe: Bu değişiklikler `1.1.3` sürümünde yer alır.
-- English: These changes are included in version `1.1.3`.
+- Türkçe: Bu değişiklikler `1.2.0` sürümünde yer alır.
+- English: These changes are included in version `1.2.0`.
 
 ## Türkçe
+
+### 1.2.0
+
+- `Shipments.CreateAsync(...)` ile `IsReturn`, satır içi `SenderAddress` ve `RecipientAddressID` kullanılarak bağımsız iade gönderisi oluşturulabilir.
+- `examples/IncomingShipment` eklendi.
 
 ### 1.1.3
 
@@ -29,6 +34,11 @@ This file documents notable changes in the SDK.
 - README ve örnekler, etiketin daha sonra `Transactions.AcceptOfferAsync(...)` ile satın alınabileceğini açıklar.
 
 ## English
+
+### 1.2.0
+
+- `Shipments.CreateAsync(...)` supports independent returns with `IsReturn`, an inline `SenderAddress`, and `RecipientAddressID`.
+- Added `examples/IncomingShipment`.
 
 ### 1.1.3
 

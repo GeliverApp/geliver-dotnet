@@ -16,8 +16,8 @@ var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipien
   Test = true,
   SenderAddress = new SenderAddressRequest
   {
-    Name = "Müşteri Adı", Phone = "+905051234567",
-    Address1 = "Örnek Mahallesi 1", CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy",
+    Name = "Müşteri Adı", Email = "customer@example.com", Phone = "+905051234567",
+    Address1 = "Örnek Mahallesi 1", CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy", Zip = "34000",
   },
   RecipientAddressID = recipientAddressID,
   Length = "10", Width = "10", Height = "10", DistanceUnit = "cm", Weight = "1", MassUnit = "kg",

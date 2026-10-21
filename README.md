@@ -75,6 +75,10 @@ Canlı ortamda `CreateTestAsync(...)` yerine `Shipments.CreateAsync(...)` çağ�
 7. Etiketleri indirin (Transaction/Shipment içindeki URL'den indirin)
 8. İadeyi oluşturup etiketi henüz satın almamak için `Shipments.CreateReturnAsync`; iadeyi oluşturup etiketi hemen satın almak için `Transactions.CreateReturnAsync` kullanın
 
+### Gönderi adresi seçimi
+
+Yeni gönderide gönderici için `SenderAddressID` veya satır içi `SenderAddress`; alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` verin. Dört kombinasyon da desteklenir; her taraf için yalnızca bir adres seçin. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın.
+
 ```csharp
 using Geliver.Sdk;
 
@@ -255,7 +259,7 @@ Listeleme parametreleri:
 
 ## Referans gönderi olmadan kargo bana gelecek
 
-Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. Gönderici için `SenderAddressID` veya satır içi `SenderAddress`; alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` kullanabilirsiniz. Dört kombinasyon da desteklenir; her taraf için yalnızca bir adres seçin. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın. `IsReturn` adresleri otomatik değiştirmez. Aşağıdaki örnekte müşteri adresi satır içi, sizin adresiniz kayıtlıdır. `Test = true` yalnızca test içindir.
+Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. `IsReturn` adresleri otomatik değiştirmez. Aşağıdaki örnekte müşteri adresi satır içi, sizin adresiniz kayıtlıdır. `Test = true` yalnızca test içindir.
 
 ```csharp
 var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID {

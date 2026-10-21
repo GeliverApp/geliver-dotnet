@@ -160,6 +160,31 @@ public class ShipmentsTests
         await Assert.ThrowsAsync<ArgumentException>(() => client.Shipments.CreateReturnAsync("shp-1", new { willAccept = true }));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ReturnFlowsPreserveCustomerSenderAddress(bool purchase)
+    {
+        var handler = new CaptureOnceHandler();
+        var client = new GeliverClient("test", httpClient: new HttpClient(handler));
+        var request = new { senderAddress = new { name = "Customer", phone = "+905051234567", address1 = "Pickup address" } };
+        if (purchase)
+            await client.Transactions.CreateReturnAsync("original-1", request);
+        else
+            await client.Shipments.CreateReturnAsync("original-1", request);
+
+        Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
+        Assert.EndsWith("/shipments/original-1", handler.LastRequest.RequestUri!.AbsolutePath);
+        using var doc = JsonDocument.Parse(handler.LastBody!);
+        var body = doc.RootElement;
+        Assert.Equal("Customer", body.GetProperty("senderAddress").GetProperty("name").GetString());
+        Assert.Equal("Pickup address", body.GetProperty("senderAddress").GetProperty("address1").GetString());
+        Assert.False(body.TryGetProperty("recipientAddress", out _));
+        Assert.False(body.TryGetProperty("recipientAddressID", out _));
+        Assert.True(body.GetProperty("isReturn").GetBoolean());
+        Assert.Equal(purchase, body.TryGetProperty("willAccept", out var willAccept) && willAccept.GetBoolean());
+    }
+
     [Fact]
     public async Task TransactionsCreateReturn_ForcesWillAcceptAndReturnsTransaction()
     {

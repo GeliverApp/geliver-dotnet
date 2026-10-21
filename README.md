@@ -253,7 +253,26 @@ Listeleme parametreleri:
 
 ---
 
-## İade Gönderisi Oluşturun
+## Referans gönderi olmadan kargo bana gelecek
+
+Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. `SenderAddress` müşterinin çıkış adresi, `RecipientAddressID` sizin kayıtlı alıcı adresinizdir. `IsReturn` adresleri otomatik değiştirmez. `Test = true` yalnızca test içindir.
+
+```csharp
+var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID {
+  IsReturn = true,
+  Test = true,
+  SenderAddress = new SenderAddressRequest {
+    Name = "Müşteri Adı", Phone = "+905051234567",
+    Address1 = "Örnek Mahallesi 1", CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy",
+  },
+  RecipientAddressID = merchantAddressID,
+  Length = "10", Width = "10", Height = "10", DistanceUnit = "cm", Weight = "1", MassUnit = "kg",
+});
+```
+
+Çalıştırılabilir örnek: `GELIVER_TOKEN=... GELIVER_MERCHANT_ADDRESS_ID=... dotnet run --project examples/IncomingShipment/IncomingShipment.csproj`. Etiketi satın almak için teklif kabul akışını kullanın.
+
+## Var olan gönderiye bağlı iade oluşturun
 
 ```csharp
 var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new {

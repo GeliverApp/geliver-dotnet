@@ -130,6 +130,10 @@ internal static class ShipmentRequestHelpers
     public static Dictionary<string, object?> Normalize(object body, bool isTest = false)
     {
         var dict = ToDictionary(body);
+        if (dict.TryGetValue("senderAddress", out var sender) && sender is not null)
+        {
+            dict["senderAddress"] = ToDictionary(sender);
+        }
         if (dict.TryGetValue("recipientAddress", out var ra) && ra is not null)
         {
             var recipientDict = ToDictionary(ra);

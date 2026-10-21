@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Geliver.Sdk;
+using Geliver.Sdk.Models;
 using Xunit;
 
 class FakeHandler : HttpMessageHandler
@@ -38,6 +39,34 @@ class CaptureOnceHandler : HttpMessageHandler
 
 public class ShipmentsTests
 {
+    [Fact]
+    public async Task CreateIncomingShipmentKeepsAddressDirection()
+    {
+        var handler = new CaptureOnceHandler();
+        var http = new HttpClient(handler) { BaseAddress = new System.Uri(GeliverClient.DefaultBaseUrl) };
+        var client = new GeliverClient("test", httpClient: http);
+
+        await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID
+        {
+            IsReturn = true,
+            SenderAddress = new SenderAddressRequest
+            {
+                Name = "Customer", Phone = "+905051234567", Address1 = "A",
+                CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy",
+            },
+            RecipientAddressID = "merchant-1",
+        });
+
+        Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
+        Assert.EndsWith("/shipments", handler.LastRequest.RequestUri!.AbsolutePath);
+        using var doc = JsonDocument.Parse(handler.LastBody!);
+        var body = doc.RootElement;
+        Assert.True(body.GetProperty("isReturn").GetBoolean());
+        Assert.Equal("Customer", body.GetProperty("senderAddress").GetProperty("name").GetString());
+        Assert.Equal("merchant-1", body.GetProperty("recipientAddressID").GetString());
+        Assert.False(body.TryGetProperty("senderAddressID", out var senderID) && senderID.ValueKind != JsonValueKind.Null);
+    }
+
     [Fact]
     public async Task ListShipments_ReturnsData()
     {

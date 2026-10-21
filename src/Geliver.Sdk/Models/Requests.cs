@@ -19,7 +19,8 @@ public class CreateAddressRequest
 
 public class CreateShipmentRequestBase
 {
-    public string SenderAddressID { get; set; } = null!;
+    public string? SenderAddressID { get; set; }
+    public SenderAddressRequest? SenderAddress { get; set; }
     public string? Length { get; set; }
     public string? Width { get; set; }
     public string? Height { get; set; }
@@ -30,6 +31,7 @@ public class CreateShipmentRequestBase
     public string? ProviderAccountID { get; set; }
     public bool? ProductPaymentOnDelivery { get; set; }
     public bool? Test { get; set; }
+    public bool? IsReturn { get; set; }
     public OrderRequest? Order { get; set; }
 }
 
@@ -62,6 +64,21 @@ public class RecipientAddressRequest
     public string? Address2 { get; set; }
     public string CountryCode { get; set; } = null!;
     public string CityName { get; set; } = null!;
+    public string CityCode { get; set; } = null!;
+    public string DistrictName { get; set; } = null!;
+    public int? DistrictID { get; set; }
+    public string? Zip { get; set; }
+}
+
+public class SenderAddressRequest
+{
+    public string Name { get; set; } = null!;
+    public string Phone { get; set; } = null!;
+    public string? Email { get; set; }
+    public string Address1 { get; set; } = null!;
+    public string? Address2 { get; set; }
+    public string CountryCode { get; set; } = null!;
+    public string? CityName { get; set; }
     public string CityCode { get; set; } = null!;
     public string DistrictName { get; set; } = null!;
     public int? DistrictID { get; set; }

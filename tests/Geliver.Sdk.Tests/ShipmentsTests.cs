@@ -40,6 +40,35 @@ class CaptureOnceHandler : HttpMessageHandler
 public class ShipmentsTests
 {
     [Fact]
+    public async Task CreateIncomingShipmentSupportsAllAddressCombinations()
+    {
+        var handler = new CaptureOnceHandler();
+        var http = new HttpClient(handler) { BaseAddress = new Uri(GeliverClient.DefaultBaseUrl) };
+        var client = new GeliverClient("test", httpClient: http);
+        var customer = new SenderAddressRequest { Name = "Customer", Phone = "+905051234567", Address1 = "A" };
+        var merchant = new RecipientAddressRequest { Name = "Merchant", Phone = "+905051234568", Address1 = "B" };
+        var cases = new (object Body, string SenderKey, string RecipientKey)[]
+        {
+            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddressID = "customer-1", RecipientAddressID = "merchant-1" }, "senderAddressID", "recipientAddressID"),
+            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddressID = "customer-1", RecipientAddress = merchant }, "senderAddressID", "recipientAddress"),
+            (new CreateShipmentWithRecipientID { IsReturn = true, SenderAddress = customer, RecipientAddressID = "merchant-1" }, "senderAddress", "recipientAddressID"),
+            (new CreateShipmentWithRecipientAddress { IsReturn = true, SenderAddress = customer, RecipientAddress = merchant }, "senderAddress", "recipientAddress"),
+        };
+
+        foreach (var (request, senderKey, recipientKey) in cases)
+        {
+            await client.Shipments.CreateAsync(request);
+            using var doc = JsonDocument.Parse(handler.LastBody!);
+            var body = doc.RootElement;
+            Assert.True(body.GetProperty("isReturn").GetBoolean());
+            foreach (var key in new[] { "senderAddressID", "senderAddress", "recipientAddressID", "recipientAddress" })
+            {
+                Assert.Equal(key == senderKey || key == recipientKey, body.TryGetProperty(key, out var value) && value.ValueKind != JsonValueKind.Null);
+            }
+        }
+    }
+
+    [Fact]
     public async Task CreateIncomingShipmentKeepsAddressDirection()
     {
         var handler = new CaptureOnceHandler();

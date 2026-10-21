@@ -13,7 +13,7 @@ This file documents notable changes in the SDK.
 
 ### 1.2.0
 
-- `Shipments.CreateAsync(...)` ile `IsReturn`, satır içi `SenderAddress` ve `RecipientAddressID` kullanılarak bağımsız iade gönderisi oluşturulabilir.
+- `Shipments.CreateAsync(...)` ile `IsReturn` ve gönderici/alıcı için bağımsız ID veya satır içi adres seçimi kullanılarak iade gönderisi oluşturulabilir.
 - `examples/IncomingShipment` eklendi.
 
 ### 1.1.3
@@ -37,7 +37,7 @@ This file documents notable changes in the SDK.
 
 ### 1.2.0
 
-- `Shipments.CreateAsync(...)` supports independent returns with `IsReturn`, an inline `SenderAddress`, and `RecipientAddressID`.
+- `Shipments.CreateAsync(...)` supports independent returns with `IsReturn` and either an address ID or an inline address for each side.
 - Added `examples/IncomingShipment`.
 
 ### 1.1.3

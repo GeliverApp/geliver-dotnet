@@ -13,6 +13,7 @@ This file documents notable changes in the SDK.
 
 ### 1.2.0
 
+- Tüm yeni gönderilerde gönderici ve alıcı için adres ID veya satır içi adresin tam olarak biri doğrulanır.
 - `Shipments.CreateAsync(...)` ile `IsReturn` ve gönderici/alıcı için bağımsız ID veya satır içi adres seçimi kullanılarak iade gönderisi oluşturulabilir.
 - `examples/IncomingShipment` eklendi.
 
@@ -37,6 +38,7 @@ This file documents notable changes in the SDK.
 
 ### 1.2.0
 
+- All new shipment flows validate that each side provides exactly one address ID or inline address.
 - `Shipments.CreateAsync(...)` supports independent returns with `IsReturn` and either an address ID or an inline address for each side.
 - Added `examples/IncomingShipment`.
 

@@ -40,6 +40,26 @@ class CaptureOnceHandler : HttpMessageHandler
 public class ShipmentsTests
 {
     [Fact]
+    public async Task AllNewShipmentFlowsRequireOneAddressPerSide()
+    {
+        var client = new GeliverClient("test");
+        var invalid = new object[]
+        {
+            new CreateShipmentWithRecipientID { RecipientAddressID = "merchant-1" },
+            new CreateShipmentWithRecipientID { SenderAddressID = "customer-1", SenderAddress = new SenderAddressRequest { Address1 = "A" }, RecipientAddressID = "merchant-1" },
+            new CreateShipmentWithRecipientID { SenderAddressID = "customer-1" },
+            new { SenderAddressID = "customer-1", RecipientAddressID = "merchant-1", RecipientAddress = new RecipientAddressRequest { Address1 = "B" } },
+        };
+
+        foreach (var body in invalid)
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => client.Shipments.CreateAsync(body));
+            await Assert.ThrowsAsync<ArgumentException>(() => client.Shipments.CreateTestAsync(body));
+            await Assert.ThrowsAsync<ArgumentException>(() => client.Transactions.CreateAsync(new { Shipment = body }));
+        }
+    }
+
+    [Fact]
     public async Task CreateIncomingShipmentSupportsAllAddressCombinations()
     {
         var handler = new CaptureOnceHandler();

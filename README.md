@@ -255,7 +255,7 @@ Listeleme parametreleri:
 
 ## Referans gönderi olmadan kargo bana gelecek
 
-Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. Gönderici için `SenderAddressID` veya satır içi `SenderAddress`; alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` kullanabilirsiniz. Dört kombinasyon da desteklenir; her taraf için yalnızca bir adres seçin. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın. `IsReturn` adresleri otomatik değiştirmez. Aşağıdaki örnekte müşteri adresi satır içi, sizin adresiniz kayıtlıdır. `Test = true` yalnızca test içindir.
+Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. Gönderici için `SenderAddressID` veya satır içi `SenderAddress`; alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` kullanabilirsiniz. Dört kombinasyon da desteklenir; her taraf için yalnızca bir adres seçin. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın. `IsReturn` adresleri otomatik değiştirmez. Aşağıdaki örnekte müşteri adresi satır içi, sizin adresiniz kayıtlıdır. `Test = true` yalnızca test içindir.
 
 ```csharp
 var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientID {

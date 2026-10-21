@@ -130,6 +130,16 @@ internal static class ShipmentRequestHelpers
     public static Dictionary<string, object?> Normalize(object body, bool isTest = false)
     {
         var dict = ToDictionary(body);
+        foreach (var side in new[] { "sender", "recipient" })
+        {
+            var hasID = dict.TryGetValue($"{side}AddressID", out var id) &&
+                id is string value && !string.IsNullOrWhiteSpace(value);
+            var hasAddress = dict.TryGetValue($"{side}Address", out var address) && address is not null;
+            if (hasID == hasAddress)
+            {
+                throw new ArgumentException($"Provide exactly one of {side}AddressID or {side}Address");
+            }
+        }
         if (dict.TryGetValue("senderAddress", out var sender) && sender is not null)
         {
             dict["senderAddress"] = ToDictionary(sender);

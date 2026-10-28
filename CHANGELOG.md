@@ -6,10 +6,16 @@ This file documents notable changes in the SDK.
 
 ## Sürüm / Version
 
-- Türkçe: Bu değişiklikler `1.1.3` sürümünde yer alır.
-- English: These changes are included in version `1.1.3`.
+- Türkçe: Bu değişiklikler `1.2.0` sürümünde yer alır.
+- English: These changes are included in version `1.2.0`.
 
 ## Türkçe
+
+### 1.2.0
+
+- Tüm yeni gönderilerde alıcı adresi zorunludur; gönderici adresi verilmezse kurumun varsayılan gönderici adresi kullanılır.
+- `Shipments.CreateAsync(...)` ile `IsReturn` ve gönderici/alıcı için bağımsız ID veya satır içi adres seçimi kullanılarak iade gönderisi oluşturulabilir.
+- `examples/IncomingShipment` eklendi.
 
 ### 1.1.3
 
@@ -29,6 +35,12 @@ This file documents notable changes in the SDK.
 - README ve örnekler, etiketin daha sonra `Transactions.AcceptOfferAsync(...)` ile satın alınabileceğini açıklar.
 
 ## English
+
+### 1.2.0
+
+- All new shipments require a recipient address; the organization default sender address is used when no sender is provided.
+- `Shipments.CreateAsync(...)` supports independent returns with `IsReturn`; the backend reverses the delivery direction for carriers.
+- Added `examples/IncomingShipment`.
 
 ### 1.1.3
 

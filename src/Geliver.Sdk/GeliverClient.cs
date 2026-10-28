@@ -10,7 +10,7 @@ namespace Geliver.Sdk;
 public partial class GeliverClient
 {
     public const string DefaultBaseUrl = "https://api.geliver.io/api/v1";
-    public const string Version = "1.1.3";
+    public const string Version = "1.2.0";
 
     private readonly HttpClient _http;
     private readonly int _maxRetries;
@@ -130,6 +130,20 @@ internal static class ShipmentRequestHelpers
     public static Dictionary<string, object?> Normalize(object body, bool isTest = false)
     {
         var dict = ToDictionary(body);
+        foreach (var side in new[] { "sender", "recipient" })
+        {
+            var hasID = dict.TryGetValue($"{side}AddressID", out var id) &&
+                id is string value && !string.IsNullOrWhiteSpace(value);
+            var hasAddress = dict.TryGetValue($"{side}Address", out var address) && address is not null;
+            if ((side == "recipient" && hasID == hasAddress) || (side == "sender" && hasID && hasAddress))
+            {
+                throw new ArgumentException($"Provide exactly one of {side}AddressID or {side}Address");
+            }
+        }
+        if (dict.TryGetValue("senderAddress", out var sender) && sender is not null)
+        {
+            dict["senderAddress"] = ToDictionary(sender);
+        }
         if (dict.TryGetValue("recipientAddress", out var ra) && ra is not null)
         {
             var recipientDict = ToDictionary(ra);

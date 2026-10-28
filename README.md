@@ -75,6 +75,10 @@ Canlı ortamda `CreateTestAsync(...)` yerine `Shipments.CreateAsync(...)` çağ�
 7. Etiketleri indirin (Transaction/Shipment içindeki URL'den indirin)
 8. İadeyi oluşturup etiketi henüz satın almamak için `Shipments.CreateReturnAsync`; iadeyi oluşturup etiketi hemen satın almak için `Transactions.CreateReturnAsync` kullanın
 
+### Gönderi adresi seçimi
+
+Yeni gönderide alıcı için `RecipientAddressID` veya satır içi `RecipientAddress` alanlarından birini verin. Gönderici için `SenderAddressID` veya `SenderAddress` kullanabilirsiniz; ikisini de vermezseniz backend kurumun varsayılan gönderici adresini kullanır. Bu kural normal ve iade dahil tüm yeni gönderilerde ve tek adım etiket satın alma akışında geçerlidir. Alıcı ID'si için `CreateShipmentWithRecipientID`, satır içi alıcı için `CreateShipmentWithRecipientAddress` kullanın.
+
 ```csharp
 using Geliver.Sdk;
 
@@ -253,20 +257,36 @@ Listeleme parametreleri:
 
 ---
 
-## İade Gönderisi Oluşturun
+## Referans gönderi olmadan kargo bana gelecek
+
+Yeni gönderiyi `Shipments.CreateAsync` ile `IsReturn = true` göndererek oluşturun. İadede `RecipientAddress` müşterinin kargonun alınacağı adresidir; `SenderAddress` sizin teslim adresinizdir. Backend taşıyıcı için yönü ters çevirir. Aşağıdaki örnek sizin için varsayılan gönderici adresini kullanır. `Test = true` yalnızca test içindir.
 
 ```csharp
-var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new {
-  providerServiceCode = "SURAT_STANDART",
+var shipment = await client.Shipments.CreateAsync(new CreateShipmentWithRecipientAddress {
+  IsReturn = true,
+  Test = true,
+  RecipientAddress = new RecipientAddressRequest {
+    Name = "Müşteri Adı", Email = "customer@example.com", Phone = "+905051234567",
+    Address1 = "Örnek Mahallesi 1", CountryCode = "TR", CityCode = "34", DistrictName = "Kadıköy", Zip = "34000",
+  },
+  Length = "10", Width = "10", Height = "10", DistanceUnit = "cm", Weight = "1", MassUnit = "kg",
 });
+```
+
+Çalıştırılabilir örnek: `GELIVER_TOKEN=... dotnet run --project examples/IncomingShipment/IncomingShipment.csproj`. Etiketi satın almak için teklif kabul akışını kullanın.
+
+## Var olan gönderiye bağlı iade oluşturun
+
+```csharp
+var returned = await client.Shipments.CreateReturnAsync(shipment!.Id, new { });
 ```
 
 Not:
 
 - `Shipments.CreateReturnAsync(...)` iadeyi oluşturur, etiketi satın almaz ve `Shipment` döner.
 - Etiketi daha sonra satın almak isterseniz, teklif hazır olduğunda normal satın alma akışını `Transactions.AcceptOfferAsync(...)` ile kullanabilirsiniz.
-- `providerServiceCode` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin sağlayıcısı kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
-- `senderAddress` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin alıcı adresi kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
+- `providerServiceCode` yalnızca etiketi hemen satın alan iade akışında kullanılır; verilmezse orijinal gönderinin taşıyıcısı seçilir. Etiketi satın almadan iade oluştururken bu alan dikkate alınmaz.
+- İade müşteriden orijinal göndericiye gider. `senderAddress` ile müşterinin kargonun alınacağı adresini değiştirebilirsiniz; verilmezse orijinal alıcı adresi kullanılır. Adresleri SDK tarafında ters çevirmeyin. Bu referanslı iade endpoint’i yalnızca inline `senderAddress` kabul eder; yeni gönderi oluşturmadaki `recipientAddress`, `recipientAddressID` ve `senderAddressID` seçenekleri burada geçerli değildir.
 - `count` alanı opsiyoneldir (varsayılan `1`). Bu fonksiyon “tek shipment için tek iade” akışı içindir; genelde `1` kullanılmalıdır.
 
 İadeyi oluşturup etiketi hemen satın almak için:
@@ -280,8 +300,8 @@ Console.WriteLine(tx?.Shipment?.Id); // return shipment id, API döndürüyorsa
 ```
 
 - `Transactions.CreateReturnAsync(...)` iadeyi oluşturur, etiketi hemen satın alır ve `Transaction` döner.
-- `providerServiceCode` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin sağlayıcısı kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
-- `senderAddress` alanı opsiyoneldir. Varsayılan olarak orijinal gönderinin alıcı adresi kullanılır; isterseniz bu alanı vererek değiştirebilirsiniz.
+- `providerServiceCode` yalnızca etiketi hemen satın alan iade akışında kullanılır; verilmezse orijinal gönderinin taşıyıcısı seçilir. Etiketi satın almadan iade oluştururken bu alan dikkate alınmaz.
+- İade müşteriden orijinal göndericiye gider. `senderAddress` ile müşterinin kargonun alınacağı adresini değiştirebilirsiniz; verilmezse orijinal alıcı adresi kullanılır. Adresleri SDK tarafında ters çevirmeyin. Bu referanslı iade endpoint’i yalnızca inline `senderAddress` kabul eder; yeni gönderi oluşturmadaki `recipientAddress`, `recipientAddressID` ve `senderAddressID` seçenekleri burada geçerli değildir.
 - `count` alanı opsiyoneldir (varsayılan `1`). Bu fonksiyon “tek shipment için tek iade” akışı içindir; genelde `1` kullanılmalıdır.
 
 ## Modeller
